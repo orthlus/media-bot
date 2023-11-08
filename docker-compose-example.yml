@@ -1,0 +1,10 @@
+version: '3.1'
+
+services:
+  social-external-rest:
+    image: social-external-rest:latest
+    restart: always
+    environment:
+      TIKTOK_URL: http://tiktok-douyin-evil0ctal:8000
+    ports:
+      - "8080:8080"

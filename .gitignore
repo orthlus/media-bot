@@ -1,0 +1,6 @@
+target
+.idea
+*.iml
+deploy.bat
+docker-compose-*.yml
+!docker-compose-example.yml
