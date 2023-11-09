@@ -7,7 +7,6 @@ import okhttp3.Request;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.ApiConstants;
 
 @Slf4j
 @Component
@@ -15,10 +14,14 @@ public class TelegramBotsWebhookRegister implements InitializingBean {
 	private final OkHttpClient client = new OkHttpClient();
 	private final BotConfig config;
 	private final String webhookUrl;
+	private final String telegramApiUrl;
 
-	public TelegramBotsWebhookRegister(@Value("${webhook.url}") String webhookUrl, BotConfig config) {
+	public TelegramBotsWebhookRegister(@Value("${webhook.url}") String webhookUrl,
+									   @Value("${telegram.api.url}") String telegramApiUrl,
+									   BotConfig config) {
 		this.config = config;
 		this.webhookUrl = webhookUrl;
+		this.telegramApiUrl = telegramApiUrl;
 	}
 
 	@Override
@@ -32,7 +35,7 @@ public class TelegramBotsWebhookRegister implements InitializingBean {
 	}
 
 	private Request request(BotConfig bot, String webhookUrl) {
-		String url = "%s%s/setWebhook".formatted(ApiConstants.BASE_URL, bot.getToken());
+		String url = "%s%s/setWebhook".formatted(telegramApiUrl, bot.getToken());
 		FormBody body = new FormBody.Builder()
 				.add("url", webhookUrl)
 				.add("drop_pending_updates", "True")
