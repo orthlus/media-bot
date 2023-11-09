@@ -8,23 +8,19 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
-import static main.OkHttpUtils.readBinaryBody;
 import static main.OkHttpUtils.readBody;
+import static main.OkHttpUtils.readInputStreamBody;
 
 @Slf4j
 @Component
-@RestController
-@RequestMapping("tiktok")
 @RequiredArgsConstructor
-public class TikTokController {
+public class TikTokService {
 	@Value("${tiktok.url}")
 	private String tiktokUrl;
 
@@ -34,8 +30,7 @@ public class TikTokController {
 			.readTimeout(5, TimeUnit.MINUTES)
 			.build();
 
-	@GetMapping("download")
-	public byte[] download(@RequestParam String url) {
+	public InputStream download(URI url) {
 		Request request = new Request.Builder().get()
 				.url(tiktokUrl + "/download?url=" + url)
 				.build();
@@ -43,7 +38,7 @@ public class TikTokController {
 		try {
 			Response response = call.execute();
 			if (response.isSuccessful()) {
-				return readBinaryBody(response);
+				return readInputStreamBody(response);
 			}
 			log.error("http error - tiktok download - response code - {}, body - {}", response.code(), readBody(response));
 		} catch (IOException e) {
