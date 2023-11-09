@@ -1,8 +1,6 @@
 package main;
 
 import lombok.extern.slf4j.Slf4j;
-import main.exception.InvalidUrl;
-import main.exception.UnknownHost;
 import org.jooq.lambda.function.Consumer2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -246,5 +244,11 @@ public class BotHandler extends SpringWebhookBot {
 		} catch (TelegramApiException e) {
 			log.error("Error send message", e);
 		}
+	}
+
+	public static class UnknownHost extends RuntimeException{
+	}
+
+	public static class InvalidUrl extends Exception {
 	}
 }
