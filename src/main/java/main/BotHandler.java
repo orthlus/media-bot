@@ -1,10 +1,10 @@
 package main;
 
 import lombok.extern.slf4j.Slf4j;
-import main.social.ig.InstagramService;
-import main.social.ig.KnownHosts;
 import main.social.TikTokService;
 import main.social.YouTubeService;
+import main.social.ig.InstagramService;
+import main.social.ig.KnownHosts;
 import org.jooq.lambda.function.Consumer2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Optional;
 import java.util.UUID;
 
 import static main.social.ig.KnownHosts.YOUTUBE;
@@ -33,7 +32,6 @@ import static main.social.ig.KnownHosts.YOUTUBE;
 @Component
 public class BotHandler extends SpringWebhookBot {
 	private final BotConfig config;
-	private final BotHandler botHandler;
 	private final String webhookUrl;
 
 	private final InstagramService instagram;
@@ -44,14 +42,12 @@ public class BotHandler extends SpringWebhookBot {
 
 	public BotHandler(@Value("${webhook.url}") String webhookUrl,
 					  BotConfig config,
-					  BotHandler botHandler,
 					  InstagramService instagram,
 					  YouTubeService youTube,
 					  TikTokService tikTok) {
 		super(new SetWebhook(webhookUrl), config.getToken());
 		this.config = config;
 		this.webhookUrl = webhookUrl;
-		this.botHandler = botHandler;
 		this.instagram = instagram;
 		this.youTube = youTube;
 		this.tikTok = tikTok;
@@ -59,7 +55,7 @@ public class BotHandler extends SpringWebhookBot {
 
 	@Override
 	public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
-		return botHandler.onWebhookUpdate(update);
+		return onWebhookUpdate(update);
 	}
 
 	@Override
