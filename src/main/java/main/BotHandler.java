@@ -148,15 +148,12 @@ public class BotHandler extends SpringWebhookBot {
 	}
 
 	private void instagramUrl(URI uri, Update update) {
-		Optional<String> mediaUrlOp = instagram.getMediaUrl(uri);
-		if (mediaUrlOp.isPresent()) {
-			log.debug("for input url {} got media url {}", uri, mediaUrlOp.get());
-			try {
-				sendVideoByUpdate(update, "", mediaUrlOp.get());
-				deleteMessage(update);
-			} catch (Exception e) {
-				log.error("error handling instagram url", e);
-			}
+		try {
+			InputStream inputStream = instagram.download(uri);
+			sendVideoByUpdate(update, "", inputStream);
+			deleteMessage(update);
+		} catch (Exception e) {
+			log.error("error handle instagram - {}", uri, e);
 		}
 	}
 

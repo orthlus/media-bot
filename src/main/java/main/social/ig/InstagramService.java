@@ -2,12 +2,16 @@ package main.social.ig;
 
 import feign.Feign;
 import feign.Request;
+import feign.Response;
 import feign.jackson.JacksonDecoder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +35,17 @@ public class InstagramService {
 				.target(IGHttp.class, apiUrl);
 	}
 
+	public InputStream download(URI uri) {
+		if (getMediaUrl(uri).isPresent()) {
+			try (Response response = client.download(uri)) {
+				return new ByteArrayInputStream(response.body().asInputStream().readAllBytes());
+			} catch (IOException e) {
+				throw new RuntimeException("error download ig file " + uri);
+			}
+		}
+
+		throw new RuntimeException("error download ig file - empty uri by " + uri);
+	}
 
 	public Optional<String> getMediaUrl(URI uri) {
 		IGMedia igMedia = client.mediaInfo(uri.toString(), apiToken);
