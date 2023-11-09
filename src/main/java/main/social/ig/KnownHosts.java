@@ -1,5 +1,8 @@
-package main;
+package main.social.ig;
 
+import lombok.Getter;
+
+@Getter
 public enum KnownHosts {
 	INSTAGRAM("instagram.com"),
 	TIKTOK("tiktok.com", "vt.tiktok.com", "vm.tiktok.com"),

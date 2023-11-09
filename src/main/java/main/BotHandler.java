@@ -1,6 +1,10 @@
 package main;
 
 import lombok.extern.slf4j.Slf4j;
+import main.social.ig.InstagramService;
+import main.social.ig.KnownHosts;
+import main.social.TikTokService;
+import main.social.YouTubeService;
 import org.jooq.lambda.function.Consumer2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,7 +27,7 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.UUID;
 
-import static main.KnownHosts.YOUTUBE;
+import static main.social.ig.KnownHosts.YOUTUBE;
 
 @Slf4j
 @Component
@@ -175,7 +179,7 @@ public class BotHandler extends SpringWebhookBot {
 	private KnownHosts parseHost(URI uri) {
 		String cleanedUrl = uri.getHost().replace("www.", "");
 		for (KnownHosts knownHost : KnownHosts.values()) {
-			for (String host : knownHost.hosts) {
+			for (String host : knownHost.getHosts()) {
 				if (cleanedUrl.contains(host))
 					return knownHost;
 			}

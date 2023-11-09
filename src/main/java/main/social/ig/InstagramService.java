@@ -1,4 +1,4 @@
-package main;
+package main.social.ig;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
