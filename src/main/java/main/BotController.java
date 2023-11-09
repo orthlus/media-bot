@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequiredArgsConstructor
 public class BotController {
-	private final Bot bot;
+	private final BotHandler bot;
 	@Value("${bot.secret}")
 	private String botSecret;
 
