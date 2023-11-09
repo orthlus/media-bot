@@ -14,24 +14,29 @@ public class TelegramBotsWebhookRegister implements InitializingBean {
 	private final OkHttpClient client = new OkHttpClient();
 	private final BotConfig config;
 	private final String webhookUrl;
+	private final boolean webhookNeedRegister;
 	private final String telegramApiUrl;
 
 	public TelegramBotsWebhookRegister(@Value("${webhook.url}") String webhookUrl,
 									   @Value("${telegram.api.url}") String telegramApiUrl,
+									   @Value("${webhook.need_register}") boolean webhookNeedRegister,
 									   BotConfig config) {
 		this.config = config;
 		this.webhookUrl = webhookUrl;
+		this.webhookNeedRegister = webhookNeedRegister;
 		this.telegramApiUrl = telegramApiUrl;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		try {
-			Request request = request(config, webhookUrl);
-			client.newCall(request).execute().body().close();
-		} catch (NullPointerException ignored) {
+		if (webhookNeedRegister) {
+			try {
+				Request request = request(config, webhookUrl);
+				client.newCall(request).execute().body().close();
+			} catch (NullPointerException ignored) {
+			}
+			log.info("bot {} webhook {} registered", config.getNickname(), webhookUrl);
 		}
-		log.info("bot {} webhook registered", config.getNickname());
 	}
 
 	private Request request(BotConfig bot, String webhookUrl) {
