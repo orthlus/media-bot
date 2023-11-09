@@ -1,21 +1,21 @@
 package main;
 
+import feign.Feign;
+import feign.form.FormEncoder;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Slf4j
 @Component
 public class TelegramBotsWebhookRegister implements InitializingBean {
-	private final OkHttpClient client = new OkHttpClient();
+	private final TelegramApiHttp client;
 	private final BotConfig config;
 	private final String webhookUrl;
 	private final boolean webhookNeedRegister;
-	private final String telegramApiUrl;
 	private final String botSecret;
 
 	public TelegramBotsWebhookRegister(@Value("${webhook.url}") String webhookUrl,
@@ -26,29 +26,25 @@ public class TelegramBotsWebhookRegister implements InitializingBean {
 		this.config = config;
 		this.webhookUrl = webhookUrl;
 		this.webhookNeedRegister = webhookNeedRegister;
-		this.telegramApiUrl = telegramApiUrl;
 		this.botSecret = botSecret;
+		client = Feign.builder()
+				.encoder(new FormEncoder())
+				.target(TelegramApiHttp.class, telegramApiUrl);
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		if (webhookNeedRegister) {
-			try {
-				Request request = request(config, webhookUrl);
-				client.newCall(request).execute().body().close();
-			} catch (NullPointerException ignored) {
-			}
+			client.register(config.getToken(), params(webhookUrl, botSecret, true));
 			log.info("bot {} webhook {} registered", config.getNickname(), webhookUrl);
 		}
 	}
 
-	private Request request(BotConfig bot, String webhookUrl) {
-		String url = "%s%s/setWebhook".formatted(telegramApiUrl, bot.getToken());
-		FormBody body = new FormBody.Builder()
-				.add("url", webhookUrl)
-				.add("secret_token", botSecret)
-				.add("drop_pending_updates", "True")
-				.build();
-		return new Request.Builder().url(url).post(body).build();
+	private Map<String, ?> params(String url, String secretToken, boolean dropPendingUpdates) {
+		return Map.of(
+				"url", url,
+				"secret_token", secretToken,
+				"drop_pending_updates", dropPendingUpdates
+		);
 	}
 }
