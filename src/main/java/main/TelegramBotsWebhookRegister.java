@@ -16,15 +16,18 @@ public class TelegramBotsWebhookRegister implements InitializingBean {
 	private final String webhookUrl;
 	private final boolean webhookNeedRegister;
 	private final String telegramApiUrl;
+	private final String botSecret;
 
 	public TelegramBotsWebhookRegister(@Value("${webhook.url}") String webhookUrl,
 									   @Value("${telegram.api.url}") String telegramApiUrl,
 									   @Value("${webhook.need_register}") boolean webhookNeedRegister,
+									   @Value("${bot.secret}") String botSecret,
 									   BotConfig config) {
 		this.config = config;
 		this.webhookUrl = webhookUrl;
 		this.webhookNeedRegister = webhookNeedRegister;
 		this.telegramApiUrl = telegramApiUrl;
+		this.botSecret = botSecret;
 	}
 
 	@Override
@@ -43,6 +46,7 @@ public class TelegramBotsWebhookRegister implements InitializingBean {
 		String url = "%s%s/setWebhook".formatted(telegramApiUrl, bot.getToken());
 		FormBody body = new FormBody.Builder()
 				.add("url", webhookUrl)
+				.add("secret_token", botSecret)
 				.add("drop_pending_updates", "True")
 				.build();
 		return new Request.Builder().url(url).post(body).build();
