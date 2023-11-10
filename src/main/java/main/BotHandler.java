@@ -5,7 +5,6 @@ import main.social.TikTokService;
 import main.social.YouTubeService;
 import main.social.ig.InstagramService;
 import main.social.ig.KnownHosts;
-import org.jooq.lambda.function.Consumer2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -151,8 +150,14 @@ public class BotHandler extends SpringWebhookBot {
 			InputStream inputStream = instagram.download(uri);
 			sendVideoByUpdate(update, "", inputStream);
 		} catch (Exception e) {
-			log.error("error handle instagram - {}", uri, e);
-			throw new NotSendException();
+			log.error("error handle instagram, trying again send url - {}", uri, e);
+			try {
+				String url = instagram.getMediaUrl(uri);
+				sendVideoByUpdate(update, "", url);
+			} catch (RuntimeException ex) {
+				log.error("error handle instagram - {}", uri, e);
+				throw new NotSendException();
+			}
 		}
 	}
 

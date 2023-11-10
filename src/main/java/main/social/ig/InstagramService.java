@@ -2,7 +2,7 @@ package main.social.ig;
 
 import feign.Feign;
 import feign.Request;
-import feign.Response;
+import feign.codec.Decoder;
 import feign.jackson.JacksonDecoder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,10 +10,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -31,29 +29,28 @@ public class InstagramService {
 		feign.Request.Options options = new Request.Options(5, TimeUnit.MINUTES, 5, TimeUnit.MINUTES, true);
 		client = Feign.builder()
 				.options(options)
-				.decoder(new JacksonDecoder())
+				.decoder((response, type) ->
+						byte[].class.equals(type) ?
+								new Decoder.Default().decode(response, type) :
+								new JacksonDecoder().decode(response, type))
 				.target(IGHttp.class, apiUrl);
 	}
 
 	public InputStream download(URI uri) {
-		if (getMediaUrl(uri).isPresent()) {
-			try (Response response = client.download(uri)) {
-				return new ByteArrayInputStream(response.body().asInputStream().readAllBytes());
-			} catch (IOException e) {
-				throw new RuntimeException("error download ig file " + uri);
-			}
-		}
+		String mediaUrl = getMediaUrl(uri);
+		byte[] bytes = client.download(URI.create(mediaUrl));
 
-		throw new RuntimeException("error download ig file - empty uri by " + uri);
+		return new ByteArrayInputStream(bytes);
 	}
 
-	public Optional<String> getMediaUrl(URI uri) {
+	public String getMediaUrl(URI uri) {
 		IGMedia igMedia = client.mediaInfo(uri.toString(), apiToken);
 		try {
-			return Optional.of(parseSingleMediaUrl(igMedia));
+			return parseSingleMediaUrl(igMedia);
 		} catch (Exception e) {
 			log.error("ig media url error", e);
-			return Optional.empty();
+
+			throw new RuntimeException("ig media url error " + uri);
 		}
 	}
 
