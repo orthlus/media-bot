@@ -101,8 +101,11 @@ public class BotHandler extends SpringWebhookBot {
 		try {
 			URI uri = getURL(parseUrlWithSign(inputText));
 			logMessageIfHasUrl(update);
-			functionByHost(uri).accept(uri, update);
+			handleByHost(uri, update);
+			deleteMessage(update);
 		} catch (InvalidUrl | UnknownHost ignored) {
+		} catch (NotSendException e) {
+			log.error("error sending message by {}", inputText);
 		}
 	}
 
@@ -115,7 +118,7 @@ public class BotHandler extends SpringWebhookBot {
 		try {
 			URI uri = getURL(inputText);
 			logMessageIfHasUrl(update);
-			functionByHost(uri).accept(uri, update);
+			handleByHost(uri, update);
 		} catch (InvalidUrl e) {
 			sendByUpdate("Какая-то неправильная у вас ссылка :(", update);
 		} catch (UnknownHost e) {
@@ -127,9 +130,9 @@ public class BotHandler extends SpringWebhookBot {
 		try {
 			InputStream file = tikTok.download(uri);
 			sendVideoByUpdate(update, "", file);
-			deleteMessage(update);
 		} catch (Exception e) {
 			log.error("error handle tiktok - {}", uri, e);
+			throw new NotSendException();
 		}
 	}
 
@@ -137,9 +140,9 @@ public class BotHandler extends SpringWebhookBot {
 		try {
 			InputStream file = youTube.downloadByUrl(uri);
 			sendVideoByUpdate(update, "", file);
-			deleteMessage(update);
 		} catch (Exception e) {
 			log.error("error handling youtube url - {}", uri, e);
+			throw new NotSendException();
 		}
 	}
 
@@ -147,18 +150,18 @@ public class BotHandler extends SpringWebhookBot {
 		try {
 			InputStream inputStream = instagram.download(uri);
 			sendVideoByUpdate(update, "", inputStream);
-			deleteMessage(update);
 		} catch (Exception e) {
 			log.error("error handle instagram - {}", uri, e);
+			throw new NotSendException();
 		}
 	}
 
-	private Consumer2<URI, Update> functionByHost(URI uri) {
-		return switch (parseHost(uri)) {
-			case INSTAGRAM -> this::instagramUrl;
-			case TIKTOK -> this::tiktokUrl;
-			case YOUTUBE -> this::youtubeUrl;
-		};
+	private void handleByHost(URI uri, Update update) {
+		switch (parseHost(uri)) {
+			case INSTAGRAM -> instagramUrl(uri, update);
+			case TIKTOK -> tiktokUrl(uri, update);
+			case YOUTUBE -> youtubeUrl(uri, update);
+		}
 	}
 
 	private boolean isItHost(URI uri, KnownHosts host) {
@@ -243,6 +246,9 @@ public class BotHandler extends SpringWebhookBot {
 		}
 	}
 
+	public static class NotSendException extends RuntimeException{
+
+	}
 	public static class UnknownHost extends RuntimeException{
 	}
 
