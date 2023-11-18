@@ -9,5 +9,5 @@ RUN apt install openjdk-17-jre wget -y
 RUN wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O /usr/local/bin/yt-dlp
 RUN chmod a+rx /usr/local/bin/yt-dlp
 
-COPY target/social-external-rest.jar .
-ENTRYPOINT ["java", "-jar", "social-external-rest.jar"]
+COPY target/app.jar .
+ENTRYPOINT ["java", "-jar", "app.jar"]

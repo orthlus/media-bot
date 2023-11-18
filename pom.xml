@@ -62,7 +62,7 @@
     </dependencies>
 
     <build>
-        <finalName>social-external-rest</finalName>
+        <finalName>app</finalName>
 
         <plugins>
             <plugin>
