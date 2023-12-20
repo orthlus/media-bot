@@ -23,8 +23,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
 import static main.social.ig.KnownHosts.YOUTUBE;
 
 @Slf4j
@@ -38,8 +41,12 @@ public class BotHandler extends SpringWebhookBot {
 	private final TikTokService tikTok;
 	@Value("${bot.private_chat.id}")
 	private long privateChatId;
+	private final Set<Long> allowedUserIds;
+	private final Set<Long> allowedChatsIds;
 
 	public BotHandler(@Value("${webhook.url}") String webhookUrl,
+					  @Value("${bot.allowed.ids.users}") Long[] allowedUserIds,
+					  @Value("${bot.allowed.ids.chats}") Long[] allowedChatsIds,
 					  BotConfig config,
 					  InstagramService instagram,
 					  YouTubeService youTube,
@@ -50,6 +57,8 @@ public class BotHandler extends SpringWebhookBot {
 		this.instagram = instagram;
 		this.youTube = youTube;
 		this.tikTok = tikTok;
+		this.allowedUserIds = new HashSet<>(asList(allowedUserIds));
+		this.allowedChatsIds = new HashSet<>(asList(allowedChatsIds));
 	}
 
 	@Override
@@ -73,11 +82,15 @@ public class BotHandler extends SpringWebhookBot {
 			long userId = update.getMessage().getFrom().getId();
 
 			if (chatId == userId) {
-				privateChat(update);
+				if (allowedUserIds.contains(userId)) {
+					privateChat(update);
+				}
 			} else if (chatId == privateChatId) {
 				myPrivateChat(update);
 			} else {
-				groupChat(update);
+				if (allowedChatsIds.contains(chatId)) {
+					groupChat(update);
+				}
 			}
 		}
 		return null;
