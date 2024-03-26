@@ -1,5 +1,6 @@
 package main;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import main.social.TikTokService;
 import main.social.YouTubeService;
@@ -7,16 +8,15 @@ import main.social.ig.InstagramService;
 import main.social.ig.KnownHosts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.bots.DefaultBotOptions;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
-import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.starter.SpringWebhookBot;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -32,9 +32,10 @@ import static main.social.ig.KnownHosts.YOUTUBE;
 
 @Slf4j
 @Component
-public class BotHandler extends SpringWebhookBot {
-	private final BotConfig config;
-	private final String webhookUrl;
+public class BotHandler extends TelegramLongPollingBot {
+	@Getter
+	@Value("${bot.nickname}")
+	private String botUsername;
 
 	private final InstagramService instagram;
 	private final YouTubeService youTube;
@@ -44,16 +45,14 @@ public class BotHandler extends SpringWebhookBot {
 	private final Set<Long> allowedUserIds;
 	private final Set<Long> allowedChatsIds;
 
-	public BotHandler(@Value("${webhook.url}") String webhookUrl,
+	public BotHandler(DefaultBotOptions options,
+					  @Value("${bot.token}") String token,
 					  @Value("${bot.allowed.ids.users}") Long[] allowedUserIds,
 					  @Value("${bot.allowed.ids.chats}") Long[] allowedChatsIds,
-					  BotConfig config,
 					  InstagramService instagram,
 					  YouTubeService youTube,
 					  TikTokService tikTok) {
-		super(new SetWebhook(webhookUrl), config.getToken());
-		this.config = config;
-		this.webhookUrl = webhookUrl;
+		super(options, token);
 		this.instagram = instagram;
 		this.youTube = youTube;
 		this.tikTok = tikTok;
@@ -62,21 +61,7 @@ public class BotHandler extends SpringWebhookBot {
 	}
 
 	@Override
-	public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
-		return onWebhookUpdate(update);
-	}
-
-	@Override
-	public String getBotPath() {
-		return webhookUrl;
-	}
-
-	@Override
-	public String getBotUsername() {
-		return config.getNickname();
-	}
-
-	public BotApiMethod<?> onWebhookUpdate(Update update) {
+	public void onUpdateReceived(Update update) {
 		if (update.hasMessage() && update.getMessage().hasText()) {
 			long chatId = update.getMessage().getChat().getId();
 			long userId = update.getMessage().getFrom().getId();
@@ -93,7 +78,6 @@ public class BotHandler extends SpringWebhookBot {
 				}
 			}
 		}
-		return null;
 	}
 
 	private void myPrivateChat(Update update) {
