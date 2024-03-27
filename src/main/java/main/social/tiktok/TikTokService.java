@@ -1,4 +1,4 @@
-package main.social;
+package main.social.tiktok;
 
 import feign.Feign;
 import feign.Request;

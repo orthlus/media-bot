@@ -2,8 +2,8 @@ package main;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import main.social.TikTokService;
-import main.social.YouTubeService;
+import main.social.tiktok.TikTokService;
+import main.social.yt.YouTubeService;
 import main.social.ig.InstagramService;
 import main.social.ig.KnownHosts;
 import org.springframework.beans.factory.annotation.Value;

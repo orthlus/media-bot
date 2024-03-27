@@ -1,4 +1,4 @@
-package main.social;
+package main.social.yt;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
