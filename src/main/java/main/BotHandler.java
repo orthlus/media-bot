@@ -84,8 +84,9 @@ public class BotHandler extends TelegramLongPollingBot {
 		String inputText = update.getMessage().getText();
 		try {
 			if (isItHost(getURL(parseUrlWithSign(inputText)), YOUTUBE)
-					&& !inputText.startsWith("!"))
+					&& !inputText.startsWith("!")) {
 				return;
+			}
 
 			groupChat(update);
 		} catch (InvalidUrl | UnknownHost ignored) {
@@ -178,8 +179,9 @@ public class BotHandler extends TelegramLongPollingBot {
 		String cleanedUrl = uri.getHost().replace("www.", "");
 		for (KnownHosts knownHost : KnownHosts.values()) {
 			for (String host : knownHost.getHosts()) {
-				if (cleanedUrl.contains(host))
+				if (cleanedUrl.contains(host)) {
 					return knownHost;
+				}
 			}
 		}
 		throw new UnknownHost();
@@ -248,10 +250,10 @@ public class BotHandler extends TelegramLongPollingBot {
 		}
 	}
 
-	public static class NotSendException extends RuntimeException{
-
+	public static class NotSendException extends RuntimeException {
 	}
-	public static class UnknownHost extends RuntimeException{
+
+	public static class UnknownHost extends RuntimeException {
 	}
 
 	public static class InvalidUrl extends Exception {

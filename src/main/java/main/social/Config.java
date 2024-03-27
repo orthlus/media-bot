@@ -10,13 +10,10 @@ import java.time.Duration;
 
 @Configuration
 public class Config {
-	@Value("${instagram.api.token}")
-	private String igApiToken;
-	@Value("${instagram.api.url}")
-	private String igApiUrl;
-
 	@Bean
-	public RestTemplate ig(RestTemplateBuilder restTemplateBuilder) {
+	public RestTemplate ig(RestTemplateBuilder restTemplateBuilder,
+						   @Value("${instagram.api.token}") String igApiToken,
+						   @Value("${instagram.api.url}") String igApiUrl) {
 		return restTemplateBuilder
 				.rootUri(igApiUrl)
 				.setConnectTimeout(Duration.ofMinutes(5))
