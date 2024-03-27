@@ -51,21 +51,6 @@
             <artifactId>jool-java-8</artifactId>
             <version>0.9.14</version>
         </dependency>
-        <dependency>
-            <groupId>io.github.openfeign</groupId>
-            <artifactId>feign-core</artifactId>
-            <version>13.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.openfeign</groupId>
-            <artifactId>feign-jackson</artifactId>
-            <version>13.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.openfeign.form</groupId>
-            <artifactId>feign-form</artifactId>
-            <version>3.8.0</version>
-        </dependency>
     </dependencies>
 
     <build>

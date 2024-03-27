@@ -2,10 +2,10 @@ package main;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import main.social.tiktok.TikTokService;
-import main.social.yt.YouTubeService;
 import main.social.ig.InstagramService;
 import main.social.ig.KnownHosts;
+import main.social.tiktok.TikTokService;
+import main.social.yt.YouTubeService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -125,10 +126,31 @@ public class BotHandler extends TelegramLongPollingBot {
 
 	private void tiktokUrl(URI uri, Update update) {
 		try {
-			InputStream file = tikTok.download(uri);
-			sendVideoByUpdate(update, "", file);
+			List<String> urls = tikTok.getMediaUrls(uri);
+
+			for (String url : urls) {
+				try {
+					InputStream file = tikTok.download(url);
+					sendVideoByUpdate(update, "", file);
+					return;
+				} catch (Exception e) {
+					log.error("tiktok - error by {}", url);
+					log.error("error send tiktok file, try another url or send directly url", e);
+				}
+			}
+			log.error("error send tiktok file, trying send url - {}", uri);
+
+			for (String url : urls) {
+				try {
+					sendVideoByUpdate(update, "", url);
+					return;
+				} catch (Exception e) {
+					log.error("tiktok - error by {}", url);
+					log.error("error send tiktok url, try another url or exit", e);
+				}
+			}
 		} catch (Exception e) {
-			log.error("error handle tiktok - {}", uri, e);
+			log.error("error send tiktok - {}", uri, e);
 			throw new NotSendException();
 		}
 	}
@@ -138,7 +160,7 @@ public class BotHandler extends TelegramLongPollingBot {
 			InputStream file = youTube.downloadByUrl(uri);
 			sendVideoByUpdate(update, "", file);
 		} catch (Exception e) {
-			log.error("error handling youtube url - {}", uri, e);
+			log.error("error send youtube url - {}", uri, e);
 			throw new NotSendException();
 		}
 	}
@@ -148,12 +170,12 @@ public class BotHandler extends TelegramLongPollingBot {
 			InputStream inputStream = instagram.download(uri);
 			sendVideoByUpdate(update, "", inputStream);
 		} catch (Exception e) {
-			log.error("error handle instagram, trying again send url - {}", uri, e);
+			log.error("error send instagram file, trying send url - {}", uri, e);
 			try {
 				String url = instagram.getMediaUrl(uri);
 				sendVideoByUpdate(update, "", url);
 			} catch (RuntimeException ex) {
-				log.error("error handle instagram - {}", uri, e);
+				log.error("error send instagram - {}", uri, e);
 				throw new NotSendException();
 			}
 		}

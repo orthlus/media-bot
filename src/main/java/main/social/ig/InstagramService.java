@@ -2,6 +2,7 @@ package main.social.ig;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -13,6 +14,7 @@ import java.net.URI;
 @Component
 @RequiredArgsConstructor
 public class InstagramService {
+	@Qualifier("ig")
 	private final RestTemplate client;
 
 	public InputStream download(URI uri) {
