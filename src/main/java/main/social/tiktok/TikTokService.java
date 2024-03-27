@@ -20,7 +20,6 @@ public class TikTokService {
 
 	public List<String> getMediaUrls(URI videoUrl) {
 		String url = "/tiktok/video_data/?tiktok_video_url=" + videoUrl.toString();
-		log.info("tiktok getMediaUrls {}", url);
 		VideoData videoData = client.getForObject(url, VideoData.class);
 		return videoData.getVideoUrls();
 	}
