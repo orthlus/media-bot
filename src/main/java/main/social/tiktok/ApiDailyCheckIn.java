@@ -16,7 +16,7 @@ public class ApiDailyCheckIn {
 	@Qualifier("tiktok")
 	private final RestTemplate client;
 
-//	@Scheduled(cron = "0 0 17 * * *", zone = "Europe/Moscow")
+	@Scheduled(cron = "0 10 7 * * *", zone = "Europe/Moscow")
 	public void checkIn() {
 		Response resp = client.getForObject("/promotion/daily_check_in", Response.class);
 		log.info("tiktok daily checkin - {}", resp.message);
