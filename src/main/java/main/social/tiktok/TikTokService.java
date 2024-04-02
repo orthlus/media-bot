@@ -1,9 +1,16 @@
 package main.social.tiktok;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayInputStream;
@@ -17,11 +24,53 @@ import java.util.List;
 public class TikTokService {
 	@Qualifier("tiktok")
 	private final RestTemplate client;
+	@Value("${tiktok.api.username}")
+	private String username;
+	@Value("${tiktok.api.password}")
+	private String password;
+	private String token;
+
+	@PostConstruct
+	public void init() {
+		updateToken();
+	}
+
+	public void updateToken() {
+		token = getToken();
+	}
+
+	private String getToken() {
+		return client.postForObject(
+				"/user/login?token_expiry_minutes=525600",
+				new HttpEntity<>(
+						new LinkedMultiValueMap<>() {{
+							add("username", username);
+							add("password", password);
+						}},
+						new HttpHeaders() {{
+							setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+						}}
+				),
+				TiktokTokenDto.class
+		).getAccessToken();
+	}
+
+	public HttpEntity getTokenEntity() {
+		return new HttpEntity<>(
+				new HttpHeaders() {{
+					setBearerAuth(token);
+				}}
+		);
+	}
 
 	public List<String> getMediaUrls(URI videoUrl) {
-		String url = "/tiktok/video_data/?tiktok_video_url=" + videoUrl.toString();
-		VideoData videoData = client.getForObject(url, VideoData.class);
-		return videoData.getVideoUrls();
+		return client.exchange(
+				"/tiktok/video_data/?tiktok_video_url=" + videoUrl.toString(),
+					HttpMethod.GET,
+					getTokenEntity(),
+					VideoData.class)
+				.getBody()
+				.getVideoUrls();
 	}
 
 	public InputStream download(String videoUrl) {

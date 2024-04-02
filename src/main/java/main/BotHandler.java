@@ -112,6 +112,9 @@ public class BotHandler extends TelegramLongPollingBot {
 		if (inputText.equals("/start")) {
 			sendByUpdate("Привет! Скачаю медиа по ссылке", update);
 			return;
+		} else if (inputText.equals("/tiktok_token")) {
+			tikTok.updateToken();
+			sendByUpdate("токен тикток апи обновлён", update);
 		}
 		try {
 			URI uri = getURL(inputText);
