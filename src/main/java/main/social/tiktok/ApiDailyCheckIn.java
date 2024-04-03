@@ -31,7 +31,7 @@ public class ApiDailyCheckIn {
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	static class Response {
-		@JsonProperty("messsage")
+		@JsonProperty("message")
 		String message;
 	}
 }
