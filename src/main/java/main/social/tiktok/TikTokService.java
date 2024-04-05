@@ -69,20 +69,18 @@ public class TikTokService {
 	}
 
 	public List<String> getMediaUrls(URI videoUrl) {
-		VideoData response;
 		try {
-			response = getMediaUrls0(videoUrl);
+			return getMediaUrls0(videoUrl).getVideoUrls();
 		} catch (HttpClientErrorException e) {
 			if (e.getResponseBodyAsString().contains("Account subscription has expired")) {
 				checkIn();
 				sleep();
-				response = getMediaUrls0(videoUrl);
+
+				return getMediaUrls0(videoUrl).getVideoUrls();
 			} else {
 				throw e;
 			}
 		}
-
-		return response.getVideoUrls();
 	}
 
 	private VideoData getMediaUrls0(URI videoUrl) {
