@@ -7,9 +7,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayInputStream;
@@ -64,29 +68,43 @@ public class TikTokService {
 		);
 	}
 
-	public List<String> getMediaUrls(URI videoUrl) throws InterruptedException {
-		ResponseEntity<VideoData> response = getMediaUrls0(videoUrl);
-		if (response.getStatusCode().is4xxClientError()) {
-			checkIn();
-			TimeUnit.SECONDS.sleep(5);
+	public List<String> getMediaUrls(URI videoUrl) {
+		VideoData response;
+		try {
 			response = getMediaUrls0(videoUrl);
+		} catch (HttpClientErrorException e) {
+			if (e.getResponseBodyAsString().contains("Account subscription has expired")) {
+				checkIn();
+				sleep();
+				response = getMediaUrls0(videoUrl);
+			} else {
+				throw e;
+			}
 		}
-		return response
-				.getBody()
-				.getVideoUrls();
+
+		return response.getVideoUrls();
 	}
 
-	private ResponseEntity<VideoData> getMediaUrls0(URI videoUrl) {
+	private VideoData getMediaUrls0(URI videoUrl) {
 		return client.exchange(
-				"/tiktok/video_data/?tiktok_video_url=" + videoUrl.toString(),
-				HttpMethod.GET,
-				getTokenEntity(),
-				VideoData.class);
+						"/tiktok/video_data/?tiktok_video_url=" + videoUrl.toString(),
+						HttpMethod.GET,
+						getTokenEntity(),
+						VideoData.class)
+				.getBody();
 	}
 
 	public InputStream download(String videoUrl) {
 		byte[] bytes = client.getForObject(URI.create(videoUrl), byte[].class);
 		return new ByteArrayInputStream(bytes);
+	}
+
+	private void sleep() {
+		try {
+			TimeUnit.SECONDS.sleep(5);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public void checkIn() {
