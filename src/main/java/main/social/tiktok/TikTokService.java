@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("DataFlowIssue")
 @Slf4j
-@Component
+//@Component
 @RequiredArgsConstructor
 public class TikTokService {
 	@Qualifier("tiktok")

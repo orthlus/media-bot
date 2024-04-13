@@ -22,11 +22,21 @@ public class Config {
 				.build();
 	}
 
-	@Bean
+//	@Bean
 	public RestTemplate tiktok(RestTemplateBuilder restTemplateBuilder,
 							   @Value("${tiktok.api.url}") String tiktokApiUrl) {
 		return restTemplateBuilder
 				.rootUri(tiktokApiUrl)
+				.setConnectTimeout(Duration.ofMinutes(5))
+				.setReadTimeout(Duration.ofMinutes(5))
+				.build();
+	}
+
+	@Bean
+	public RestTemplate tiktokBeta(RestTemplateBuilder restTemplateBuilder,
+							   @Value("${tiktok.beta.api.url}") String tiktokApiUrl) {
+		return restTemplateBuilder
+				.rootUri(tiktokApiUrl + "/api/v1/tiktok/web")
 				.setConnectTimeout(Duration.ofMinutes(5))
 				.setReadTimeout(Duration.ofMinutes(5))
 				.build();

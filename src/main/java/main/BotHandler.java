@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import main.social.ig.InstagramService;
 import main.social.ig.KnownHosts;
-import main.social.tiktok.TikTokService;
+import main.social.tiktok.TikTokBetaService;
 import main.social.yt.YouTubeService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -40,7 +40,7 @@ public class BotHandler extends TelegramLongPollingBot {
 
 	private final InstagramService instagram;
 	private final YouTubeService youTube;
-	private final TikTokService tikTok;
+	private final TikTokBetaService tikTok;
 	@Value("${bot.private_chat.id}")
 	private long privateChatId;
 	private final Set<Long> allowedUserIds;
@@ -52,7 +52,7 @@ public class BotHandler extends TelegramLongPollingBot {
 					  @Value("${bot.allowed.ids.chats}") Long[] allowedChatsIds,
 					  InstagramService instagram,
 					  YouTubeService youTube,
-					  TikTokService tikTok) {
+					  TikTokBetaService tikTok) {
 		super(options, token);
 		this.instagram = instagram;
 		this.youTube = youTube;
@@ -113,8 +113,9 @@ public class BotHandler extends TelegramLongPollingBot {
 			sendByUpdate("Привет! Скачаю медиа по ссылке", update);
 			return;
 		} else if (inputText.equals("/tiktok_token")) {
-			tikTok.updateToken();
-			sendByUpdate("токен тикток апи обновлён", update);
+//			tikTok.updateToken();
+//			sendByUpdate("токен тикток апи обновлён", update);
+			sendByUpdate("отключено", update);
 		}
 		try {
 			URI uri = getURL(inputText);
