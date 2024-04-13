@@ -25,6 +25,7 @@ public class VideoDataBeta {
 	}
 
 	static class ItemStruct {
+		@JsonProperty("video")
 		Video video;
 	}
 
