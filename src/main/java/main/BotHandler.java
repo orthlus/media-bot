@@ -129,47 +129,46 @@ public class BotHandler extends TelegramLongPollingBot {
 
 	private void tiktokUrl(URI uri, Update update) {
 		for (TikTok tiktokService : tiktokServices) {
-			boolean result = tiktokHandleByService(tiktokService, uri, update);
+			try {
+				boolean success = tiktokHandleByService(tiktokService, uri, update);
 
-			if (result) {
-				return;
+				if (success) {
+					return;
+				}
+			} catch (Exception e) {
+				log.error("error send tiktok - {} by service {}", uri, tiktokService.getTiktokServiceName(), e);
 			}
 		}
+
 		throw new NotSendException();
 	}
 
 	private boolean tiktokHandleByService(TikTok tikTok, URI uri, Update update) {
 		log.info("started with {}", tikTok.getTiktokServiceName());
-		try {
-			List<String> urls = tikTok.getMediaUrls(uri);
+		List<String> urls = tikTok.getMediaUrls(uri);
 
-			for (String url : urls) {
-				try {
-					InputStream file = tikTok.download(url);
-					sendVideoByUpdate(update, "", file);
+		for (String url : urls) {
+			try {
+				InputStream file = tikTok.download(url);
+				sendVideoByUpdate(update, "", file);
 
-					return true;
-				} catch (Exception e) {
-					log.error("tiktok - error by {}", url);
-					log.error("error send tiktok file, try another url or send directly url", e);
-				}
+				return true;
+			} catch (Exception e) {
+				log.error("tiktok - error by {}", url);
+				log.error("error send tiktok file, try another url or send directly url", e);
 			}
-			log.error("error send tiktok file, trying send url - {}", uri);
+		}
+		log.error("error send tiktok file, trying send url - {}", uri);
 
-			for (String url : urls) {
-				try {
-					sendVideoByUpdate(update, "", url);
+		for (String url : urls) {
+			try {
+				sendVideoByUpdate(update, "", url);
 
-					return true;
-				} catch (Exception e) {
-					log.error("tiktok - error by {}", url);
-					log.error("error send tiktok url, try another url or exit", e);
-				}
+				return true;
+			} catch (Exception e) {
+				log.error("tiktok - error by {}", url);
+				log.error("error send tiktok url, try another url or exit", e);
 			}
-		} catch (Exception e) {
-			log.error("error send tiktok - {} by service {}", uri, tikTok.getTiktokServiceName(), e);
-
-			return false;
 		}
 
 		return false;
