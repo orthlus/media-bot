@@ -40,7 +40,7 @@ public class BotHandler extends TelegramLongPollingBot {
 
 	private final InstagramService instagram;
 	private final YouTubeService youTube;
-	private final TikTokBetaService tikTok;
+	private final TikTokBetaService tikTokBeta;
 	@Value("${bot.private_chat.id}")
 	private long privateChatId;
 	private final Set<Long> allowedUserIds;
@@ -52,11 +52,11 @@ public class BotHandler extends TelegramLongPollingBot {
 					  @Value("${bot.allowed.ids.chats}") Long[] allowedChatsIds,
 					  InstagramService instagram,
 					  YouTubeService youTube,
-					  TikTokBetaService tikTok) {
+					  TikTokBetaService tikTokBeta) {
 		super(options, token);
 		this.instagram = instagram;
 		this.youTube = youTube;
-		this.tikTok = tikTok;
+		this.tikTokBeta = tikTokBeta;
 		this.allowedUserIds = new HashSet<>(asList(allowedUserIds));
 		this.allowedChatsIds = new HashSet<>(asList(allowedChatsIds));
 	}
@@ -130,11 +130,11 @@ public class BotHandler extends TelegramLongPollingBot {
 
 	private void tiktokUrl(URI uri, Update update) {
 		try {
-			List<String> urls = tikTok.getMediaUrls(uri);
+			List<String> urls = tikTokBeta.getMediaUrls(uri);
 
 			for (String url : urls) {
 				try {
-					InputStream file = tikTok.download(url);
+					InputStream file = tikTokBeta.download(url);
 					sendVideoByUpdate(update, "", file);
 					return;
 				} catch (Exception e) {
