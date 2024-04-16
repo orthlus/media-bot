@@ -16,7 +16,6 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -140,6 +139,7 @@ public class BotHandler extends TelegramLongPollingBot {
 	}
 
 	private boolean tiktokHandleByService(TikTok tikTok, URI uri, Update update) {
+		log.info("started with {}", tikTok.getTiktokServiceName());
 		try {
 			List<String> urls = tikTok.getMediaUrls(uri);
 
@@ -255,7 +255,7 @@ public class BotHandler extends TelegramLongPollingBot {
 					.chatId(message.getChatId())
 					.text(text)
 					.build());
-		} catch (TelegramApiException e) {
+		} catch (Exception e) {
 			log.error("{} - Error send message '{}'", this.getClass().getName(), message.getText(), e);
 		}
 	}
@@ -266,7 +266,7 @@ public class BotHandler extends TelegramLongPollingBot {
 		try {
 			execute(new DeleteMessage(String.valueOf(chatId), messageId));
 			log.debug("{} - Deleted message, chat {} messageId {}", this.getClass().getName(), chatId, messageId);
-		} catch (TelegramApiException e) {
+		} catch (Exception e) {
 			log.error("{} - Error delete message, chat {} messageId {}", this.getClass().getName(), chatId, messageId, e);
 		}
 	}
@@ -287,7 +287,7 @@ public class BotHandler extends TelegramLongPollingBot {
 					.video(inputFile)
 					.build();
 			execute(video);
-		} catch (TelegramApiException e) {
+		} catch (Exception e) {
 			log.error("Error send message", e);
 		}
 	}
