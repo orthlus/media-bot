@@ -144,7 +144,6 @@ public class BotHandler extends TelegramLongPollingBot {
 	}
 
 	private boolean tiktokHandleByService(TikTok tikTok, URI uri, Update update) {
-		log.info("started with {}", tikTok.getTiktokServiceName());
 		List<String> urls = tikTok.getMediaUrls(uri);
 
 		for (String url : urls) {
