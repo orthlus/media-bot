@@ -269,7 +269,7 @@ public class BotHandler extends TelegramLongPollingBot {
 	}
 
 	public void sendVideoByUpdate(Update update, String message, InputStream dataStream) {
-		sendVideoByUpdate(update, message, new InputFile(dataStream, UUID.randomUUID().toString()));
+		sendVideoByUpdate(update, message, new InputFile(dataStream, UUID.randomUUID() + ".mp4"));
 	}
 
 	public void sendVideoByUpdate(Update update, String message, String videoUrl) {
