@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import main.social.ig.InstagramService;
 import main.social.ig.KnownHosts;
-import main.social.tiktok.TikTokBetaService;
+import main.social.tiktok.TikTok;
 import main.social.yt.YouTubeService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -40,7 +40,7 @@ public class BotHandler extends TelegramLongPollingBot {
 
 	private final InstagramService instagram;
 	private final YouTubeService youTube;
-	private final TikTokBetaService tikTokBeta;
+	private final List<TikTok> tiktokServices;
 	@Value("${bot.private_chat.id}")
 	private long privateChatId;
 	private final Set<Long> allowedUserIds;
@@ -52,13 +52,13 @@ public class BotHandler extends TelegramLongPollingBot {
 					  @Value("${bot.allowed.ids.chats}") Long[] allowedChatsIds,
 					  InstagramService instagram,
 					  YouTubeService youTube,
-					  TikTokBetaService tikTokBeta) {
+					  List<TikTok> tiktokServices) {
 		super(options, token);
 		this.instagram = instagram;
 		this.youTube = youTube;
-		this.tikTokBeta = tikTokBeta;
 		this.allowedUserIds = new HashSet<>(asList(allowedUserIds));
 		this.allowedChatsIds = new HashSet<>(asList(allowedChatsIds));
+		this.tiktokServices = tiktokServices;
 	}
 
 	@Override
@@ -129,14 +129,26 @@ public class BotHandler extends TelegramLongPollingBot {
 	}
 
 	private void tiktokUrl(URI uri, Update update) {
+		for (TikTok tiktokService : tiktokServices) {
+			boolean result = tiktokHandleByService(tiktokService, uri, update);
+
+			if (result) {
+				return;
+			}
+		}
+		throw new NotSendException();
+	}
+
+	private boolean tiktokHandleByService(TikTok tikTok, URI uri, Update update) {
 		try {
-			List<String> urls = tikTokBeta.getMediaUrls(uri);
+			List<String> urls = tikTok.getMediaUrls(uri);
 
 			for (String url : urls) {
 				try {
-					InputStream file = tikTokBeta.download(url);
+					InputStream file = tikTok.download(url);
 					sendVideoByUpdate(update, "", file);
-					return;
+
+					return true;
 				} catch (Exception e) {
 					log.error("tiktok - error by {}", url);
 					log.error("error send tiktok file, try another url or send directly url", e);
@@ -147,16 +159,20 @@ public class BotHandler extends TelegramLongPollingBot {
 			for (String url : urls) {
 				try {
 					sendVideoByUpdate(update, "", url);
-					return;
+
+					return true;
 				} catch (Exception e) {
 					log.error("tiktok - error by {}", url);
 					log.error("error send tiktok url, try another url or exit", e);
 				}
 			}
 		} catch (Exception e) {
-			log.error("error send tiktok - {}", uri, e);
-			throw new NotSendException();
+			log.error("error send tiktok - {} by service {}", uri, tikTok.getTiktokServiceName(), e);
+
+			return false;
 		}
+
+		return false;
 	}
 
 	private void youtubeUrl(URI uri, Update update) {

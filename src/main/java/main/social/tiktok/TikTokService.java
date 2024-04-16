@@ -24,9 +24,9 @@ import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("DataFlowIssue")
 @Slf4j
-//@Component
+@Component
 @RequiredArgsConstructor
-public class TikTokService {
+public class TikTokService implements TikTok {
 	@Qualifier("tiktok")
 	private final RestTemplate client;
 	@Value("${tiktok.api.username}")
@@ -68,6 +68,7 @@ public class TikTokService {
 		);
 	}
 
+	@Override
 	public List<String> getMediaUrls(URI videoUrl) {
 		try {
 			return getMediaUrls0(videoUrl).getVideoUrls();
@@ -92,9 +93,15 @@ public class TikTokService {
 				.getBody();
 	}
 
+	@Override
 	public InputStream download(String videoUrl) {
 		byte[] bytes = client.getForObject(URI.create(videoUrl), byte[].class);
 		return new ByteArrayInputStream(bytes);
+	}
+
+	@Override
+	public String getTiktokServiceName() {
+		return "tikhub";
 	}
 
 	private void sleep() {

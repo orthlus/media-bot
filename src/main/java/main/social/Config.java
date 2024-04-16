@@ -22,7 +22,7 @@ public class Config {
 				.build();
 	}
 
-//	@Bean
+	@Bean
 	public RestTemplate tiktok(RestTemplateBuilder restTemplateBuilder,
 							   @Value("${tiktok.api.url}") String tiktokApiUrl) {
 		return restTemplateBuilder

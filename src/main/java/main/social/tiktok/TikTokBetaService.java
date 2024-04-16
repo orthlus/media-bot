@@ -17,10 +17,11 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class TikTokBetaService {
+public class TikTokBetaService implements TikTok {
 	@Qualifier("tiktokBeta")
 	private final RestTemplate client;
 
+	@Override
 	public List<String> getMediaUrls(URI videoUrl) {
 		String videoId = getVideoId(videoUrl);
 		return getMediaUrls0(videoId);
@@ -44,9 +45,15 @@ public class TikTokBetaService {
 		String id;
 	}
 
+	@Override
 	public InputStream download(String videoUrl) {
 		byte[] bytes = client.getForObject(URI.create(videoUrl), byte[].class);
 		return new ByteArrayInputStream(bytes);
+	}
+
+	@Override
+	public String getTiktokServiceName() {
+		return "tikhub-beta";
 	}
 
 }
