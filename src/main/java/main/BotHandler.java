@@ -154,8 +154,7 @@ public class BotHandler extends TelegramLongPollingBot {
 
 				return true;
 			} catch (Exception e) {
-				log.error("tiktok - error by {}", url);
-				log.error("error send tiktok file, try another url or send directly url", e);
+				log.error("error tiktok by {} - error send file", url, e);
 			}
 		}
 		log.error("error send tiktok file, trying send url - {}", uri);
@@ -166,11 +165,11 @@ public class BotHandler extends TelegramLongPollingBot {
 
 				return true;
 			} catch (Exception e) {
-				log.error("tiktok - error by {}", url);
-				log.error("error send tiktok url, try another url or exit", e);
+				log.error("error tiktok by {} - error send url", url, e);
 			}
 		}
 
+		log.error("error send tiktok - {} by service {}", uri, tikTok.getTiktokServiceName());
 		return false;
 	}
 
