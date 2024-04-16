@@ -287,6 +287,7 @@ public class BotHandler extends TelegramLongPollingBot {
 			execute(video);
 		} catch (Exception e) {
 			log.error("Error send message", e);
+			throw new RuntimeException(e);
 		}
 	}
 
