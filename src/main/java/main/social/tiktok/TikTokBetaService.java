@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -15,6 +16,7 @@ import java.util.List;
 
 @SuppressWarnings("DataFlowIssue")
 @Slf4j
+@Order(2)
 @Component
 @RequiredArgsConstructor
 public class TikTokBetaService implements TikTok {
