@@ -11,36 +11,31 @@ public class VideoDataBeta {
 	private Data data;
 
 	public List<String> getVideoUrls() {
-		return data.itemInfo.itemStruct.video.bitrateInfo[0].playAddr.urlList;
+		return data.awemeDetails[0].video.bitrate[0].playAddr.urlList;
 	}
 
 	static class Data {
-		@JsonProperty("itemInfo")
-		ItemInfo itemInfo;
+		@JsonProperty("aweme_details")
+		AwemeDetails[] awemeDetails;
 	}
 
-	static class ItemInfo {
-		@JsonProperty("itemStruct")
-		ItemStruct itemStruct;
-	}
-
-	static class ItemStruct {
+	static class AwemeDetails {
 		@JsonProperty("video")
 		Video video;
 	}
 
 	static class Video {
-		@JsonProperty("bitrateInfo")
-		BitrateInfo[] bitrateInfo;
+		@JsonProperty("bitrate")
+		BitrateInfo[] bitrate;
 	}
 
 	static class BitrateInfo {
-		@JsonProperty("PlayAddr")
+		@JsonProperty("play_addr")
 		PlayAddr playAddr;
 	}
 
 	static class PlayAddr {
-		@JsonProperty("UrlList")
+		@JsonProperty("url_list")
 		List<String> urlList;
 	}
 }

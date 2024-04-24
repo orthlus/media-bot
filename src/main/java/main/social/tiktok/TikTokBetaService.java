@@ -31,13 +31,13 @@ public class TikTokBetaService implements TikTok {
 
 	private List<String> getMediaUrls0(String videoId) {
 		return client
-				.getForObject("/fetch_post_detail?itemId=" + videoId, VideoDataBeta.class)
+				.getForObject("/app/v2/fetch_one_video?aweme_id=" + videoId, VideoDataBeta.class)
 				.getVideoUrls();
 	}
 
 	private String getVideoId(URI videoUrl) {
 		return client
-				.getForObject("/get_aweme_id?url=" + videoUrl.toString(), VideoIdResponse.class)
+				.getForObject("/web/get_aweme_id?url=" + videoUrl.toString(), VideoIdResponse.class)
 				.id;
 	}
 

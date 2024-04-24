@@ -36,7 +36,7 @@ public class Config {
 	public RestTemplate tiktokBeta(RestTemplateBuilder restTemplateBuilder,
 							   @Value("${tiktok.beta.api.url}") String tiktokApiUrl) {
 		return restTemplateBuilder
-				.rootUri(tiktokApiUrl + "/api/v1/tiktok/web")
+				.rootUri(tiktokApiUrl + "/api/v1/tiktok")
 				.setConnectTimeout(Duration.ofMinutes(5))
 				.setReadTimeout(Duration.ofMinutes(5))
 				.build();
