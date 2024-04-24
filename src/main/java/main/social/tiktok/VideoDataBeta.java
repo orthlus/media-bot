@@ -25,7 +25,7 @@ public class VideoDataBeta {
 	}
 
 	static class Video {
-		@JsonProperty("bitrate")
+		@JsonProperty("bit_rate")
 		BitrateInfo[] bitrate;
 	}
 
