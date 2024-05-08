@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Arrays.asList;
 import static main.social.ig.KnownHosts.YOUTUBE;
@@ -44,6 +45,7 @@ public class BotHandler extends TelegramLongPollingBot {
 	private long privateChatId;
 	private final Set<Long> allowedUserIds;
 	private final Set<Long> allowedChatsIds;
+	private final AtomicBoolean substitution = new AtomicBoolean(false);
 
 	public BotHandler(DefaultBotOptions options,
 					  @Value("${bot.token}") String token,
@@ -83,12 +85,23 @@ public class BotHandler extends TelegramLongPollingBot {
 	private void myPrivateChat(Update update) {
 		String inputText = update.getMessage().getText();
 		try {
-			if (isItHost(getURL(parseUrlWithSign(inputText)), YOUTUBE)
-					&& !inputText.startsWith("!")) {
+			if (inputText.equals("Катя, замена")) {
+				substitution.set(true);
+				return;
+			} else if (inputText.equals("Катя, стоп")) {
+				substitution.set(false);
 				return;
 			}
 
-			groupChat(update);
+			if (isItHost(getURL(parseUrlWithSign(inputText)), YOUTUBE)) {
+				if (substitution.get()) {
+					groupChat(update);
+				} else if (inputText.startsWith("!")) {
+					groupChat(update);
+				}
+			} else {
+				groupChat(update);
+			}
 		} catch (InvalidUrl | UnknownHost ignored) {
 		}
 	}
