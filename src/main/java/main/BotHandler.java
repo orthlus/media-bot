@@ -86,9 +86,11 @@ public class BotHandler extends TelegramLongPollingBot {
 		String inputText = update.getMessage().getText();
 		try {
 			if (inputText.equals("Катя, замена")) {
+				sendByUpdate("ок, обрабатываю ютуб", update);
 				substitution.set(true);
 				return;
 			} else if (inputText.equals("Катя, стоп")) {
+				sendByUpdate("ок, больше не обрабатываю ютуб", update);
 				substitution.set(false);
 				return;
 			}
