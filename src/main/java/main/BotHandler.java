@@ -45,7 +45,7 @@ public class BotHandler extends TelegramLongPollingBot {
 	private long privateChatId;
 	private final Set<Long> allowedUserIds;
 	private final Set<Long> allowedChatsIds;
-	private final AtomicBoolean substitution = new AtomicBoolean(false);
+	private final AtomicBoolean substitution = new AtomicBoolean(true);
 
 	public BotHandler(DefaultBotOptions options,
 					  @Value("${bot.token}") String token,
