@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("DataFlowIssue")
 @Slf4j
 @Order(1)
-@Component
+//@Component
 @RequiredArgsConstructor
 public class TikTokService implements TikTok {
 	@Qualifier("tiktok")
@@ -37,7 +37,7 @@ public class TikTokService implements TikTok {
 	private String password;
 	private String token;
 
-	@PostConstruct
+//	@PostConstruct
 	public void init() {
 		updateToken();
 	}
