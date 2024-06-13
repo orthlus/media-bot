@@ -8,14 +8,19 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VideoData {
-	@JsonProperty("aweme_list")
-	private AwemeList[] awemeList;
+	@JsonProperty("data")
+	private Data data;
 
 	public List<String> getVideoUrls() {
-		return awemeList[0].video.bitRate[0].playAddr.urlList;
+		return data.awemeDetails[0].video.bitRate[0].playAddr.urlList;
 	}
 
-	static class AwemeList {
+	static class Data {
+		@JsonProperty("aweme_details")
+		private AwemeDetails[] awemeDetails;
+	}
+
+	static class AwemeDetails {
 		@JsonProperty("video")
 		Video video;
 	}

@@ -24,11 +24,13 @@ public class Config {
 
 	@Bean
 	public RestTemplate tiktok(RestTemplateBuilder restTemplateBuilder,
-							   @Value("${tiktok.api.url}") String tiktokApiUrl) {
+							   @Value("${tiktok.api.url}") String tiktokApiUrl,
+							   @Value("${tiktok.api.token}") String tiktokApiToken) {
 		return restTemplateBuilder
 				.rootUri(tiktokApiUrl)
 				.setConnectTimeout(Duration.ofMinutes(5))
 				.setReadTimeout(Duration.ofMinutes(5))
+				.defaultHeader("authorization", "Bearer " + tiktokApiToken)
 				.build();
 	}
 
