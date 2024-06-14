@@ -1,23 +1,32 @@
 package main;
 
+import com.google.common.collect.Lists;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import main.exceptions.InvalidUrl;
 import main.exceptions.NotSendException;
 import main.exceptions.UnknownHost;
 import main.social.ig.InstagramService;
-import main.social.tiktok.TikTok;
+import main.social.tiktok.TikTokService;
+import main.social.tiktok.VideoData;
 import main.social.yt.YouTubeService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.bots.DefaultBotOptions;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
+import org.telegram.telegrambots.longpolling.starter.SpringLongPollingBot;
+import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
+import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -28,45 +37,41 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Arrays.asList;
-import static main.BotUtils.getURL;
-import static main.BotUtils.parseUrlWithSign;
-import static main.BotUtils.isItHost;
-import static main.BotUtils.parseHost;
+import static main.BotUtils.*;
 import static main.social.ig.KnownHosts.YOUTUBE;
 
 @Slf4j
 @Component
-public class BotHandler extends TelegramLongPollingBot {
+@RequiredArgsConstructor
+public class BotHandler implements LongPollingSingleThreadUpdateConsumer, SpringLongPollingBot {
 	@Getter
-	@Value("${bot.nickname}")
-	private String botUsername;
+	@Value("${bot.token}")
+	private String botToken;
 
 	private final InstagramService instagram;
 	private final YouTubeService youTube;
-	private final List<TikTok> tiktokServices;
+	private final TikTokService tiktok;
+	private final TelegramClient telegramClient;
+
 	@Value("${bot.private_chat.id}")
 	private long privateChatId;
-	private final Set<Long> allowedUserIds;
-	private final Set<Long> allowedChatsIds;
+	@Value("${bot.allowed.ids.users}")
+	private Long[] allowedUserIdsArr;
+	@Value("${bot.allowed.ids.chats}")
+	private Long[] allowedChatsIdsArr;
+
+	private Set<Long> allowedUserIds;
+	private Set<Long> allowedChatsIds;
 	private final AtomicBoolean substitution = new AtomicBoolean(true);
 
-	public BotHandler(DefaultBotOptions options,
-					  @Value("${bot.token}") String token,
-					  @Value("${bot.allowed.ids.users}") Long[] allowedUserIds,
-					  @Value("${bot.allowed.ids.chats}") Long[] allowedChatsIds,
-					  InstagramService instagram,
-					  YouTubeService youTube,
-					  List<TikTok> tiktokServices) {
-		super(options, token);
-		this.instagram = instagram;
-		this.youTube = youTube;
-		this.allowedUserIds = new HashSet<>(asList(allowedUserIds));
-		this.allowedChatsIds = new HashSet<>(asList(allowedChatsIds));
-		this.tiktokServices = tiktokServices;
+	@PostConstruct
+	private void init() {
+		this.allowedUserIds = new HashSet<>(asList(allowedUserIdsArr));
+		this.allowedChatsIds = new HashSet<>(asList(allowedChatsIdsArr));
 	}
 
 	@Override
-	public void onUpdateReceived(Update update) {
+	public void consume(Update update) {
 		if (update.hasMessage() && update.getMessage().hasText()) {
 			long chatId = update.getMessage().getChat().getId();
 			long userId = update.getMessage().getFrom().getId();
@@ -129,10 +134,6 @@ public class BotHandler extends TelegramLongPollingBot {
 		if (inputText.equals("/start")) {
 			sendByUpdate("Привет! Скачаю медиа по ссылке", update);
 			return;
-		} else if (inputText.equals("/tiktok_token")) {
-//			tikTok.updateToken();
-//			sendByUpdate("токен тикток апи обновлён", update);
-			sendByUpdate("отключено", update);
 		}
 		try {
 			URI uri = getURL(inputText);
@@ -145,31 +146,37 @@ public class BotHandler extends TelegramLongPollingBot {
 		}
 	}
 
-	private void tiktokUrl(URI uri, Update update) {
-		for (TikTok tiktokService : tiktokServices) {
-			try {
-				boolean success = tiktokHandleByService(tiktokService, uri, update);
-
-				if (success) {
-					return;
-				}
-			} catch (Exception e) {
-				log.error("error send tiktok - {} by service {}", uri, tiktokService.getTiktokServiceName(), e);
-			}
+	private void handleByHost(URI uri, Update update) {
+		switch (parseHost(uri)) {
+			case INSTAGRAM -> instagramUrl(uri, update);
+			case TIKTOK -> tiktokUrl(uri, update);
+			case YOUTUBE -> youtubeUrl(uri, update);
 		}
-
-		throw new NotSendException();
 	}
 
-	private boolean tiktokHandleByService(TikTok tikTok, URI uri, Update update) {
-		List<String> urls = tikTok.getMediaUrls(uri);
+	private void tiktokUrl(URI uri, Update update) {
+		VideoData data = tiktok.getData(uri);
+		if (tiktok.isVideo(data)) {
+			tiktokSendVideo(data, uri, update);
+		} else {
+			tiktokSendImages(data, update);
+		}
+	}
+
+	private void tiktokSendImages(VideoData data, Update update) {
+		List<String> imagesUrls = tiktok.getImagesUrls(data);
+		sendImagesByUpdate(update, imagesUrls);
+	}
+
+	private void tiktokSendVideo(VideoData data, URI uri, Update update) {
+		List<String> urls = tiktok.getVideoMediaUrls(data);
 
 		for (String url : urls) {
 			try {
-				InputStream file = tikTok.download(url);
+				InputStream file = tiktok.download(url);
 				sendVideoByUpdate(update, "", file);
 
-				return true;
+				return;
 			} catch (Exception e) {
 				log.error("error tiktok by {} - error send file", url, e);
 			}
@@ -180,14 +187,13 @@ public class BotHandler extends TelegramLongPollingBot {
 			try {
 				sendVideoByUpdate(update, "", url);
 
-				return true;
+				return;
 			} catch (Exception e) {
 				log.error("error tiktok by {} - error send url", url, e);
 			}
 		}
 
-		log.error("error send tiktok - {} by service {}", uri, tikTok.getTiktokServiceName());
-		return false;
+		log.error("error send tiktok - {}", uri);
 	}
 
 	private void youtubeUrl(URI uri, Update update) {
@@ -216,14 +222,6 @@ public class BotHandler extends TelegramLongPollingBot {
 		}
 	}
 
-	private void handleByHost(URI uri, Update update) {
-		switch (parseHost(uri)) {
-			case INSTAGRAM -> instagramUrl(uri, update);
-			case TIKTOK -> tiktokUrl(uri, update);
-			case YOUTUBE -> youtubeUrl(uri, update);
-		}
-	}
-
 	private void logMessageIfHasUrl(Update update) {
 		try {
 			getURL(update.getMessage().getText());
@@ -238,7 +236,7 @@ public class BotHandler extends TelegramLongPollingBot {
 	private void sendByUpdate(String text, Update update) {
 		Message message = update.getMessage();
 		try {
-			execute(SendMessage.builder()
+			telegramClient.execute(SendMessage.builder()
 					.chatId(message.getChatId())
 					.text(text)
 					.build());
@@ -251,7 +249,7 @@ public class BotHandler extends TelegramLongPollingBot {
 		long chatId = update.getMessage().getChatId();
 		int messageId = update.getMessage().getMessageId();
 		try {
-			execute(new DeleteMessage(String.valueOf(chatId), messageId));
+			telegramClient.execute(new DeleteMessage(String.valueOf(chatId), messageId));
 			log.debug("{} - Deleted message, chat {} messageId {}", this.getClass().getName(), chatId, messageId);
 		} catch (Exception e) {
 			log.error("{} - Error delete message, chat {} messageId {}", this.getClass().getName(), chatId, messageId, e);
@@ -273,15 +271,46 @@ public class BotHandler extends TelegramLongPollingBot {
 					.caption(message)
 					.video(inputFile)
 					.build();
-			execute(video);
+			telegramClient.execute(video);
 		} catch (Exception e) {
 			log.error("Error send message", e);
 			throw new RuntimeException(e);
 		}
 	}
 
-	public static class NotSendException extends RuntimeException {
+	public void sendImagesByUpdate(Update update, List<String> imagesUrls) {
+		try {
+			if (imagesUrls.isEmpty()) {
+				return;
+			}
+
+			if (imagesUrls.size() == 1) {
+				SendPhoto photo = SendPhoto.builder()
+						.chatId(update.getMessage().getChatId())
+						.photo(new InputFile(imagesUrls.get(0)))
+						.build();
+				telegramClient.execute(photo);
+			} else {
+				List<InputMediaPhoto> inputMediaPhotos = imagesUrls.stream()
+						.map(InputMediaPhoto::new)
+						.toList();
+				List<List<InputMediaPhoto>> partitions = Lists.partition(inputMediaPhotos, 10);
+				for (List<InputMediaPhoto> photos : partitions) {
+					SendMediaGroup media = SendMediaGroup.builder()
+							.chatId(update.getMessage().getChatId())
+							.medias(photos)
+							.build();
+					telegramClient.execute(media);
+				}
+			}
+		} catch (Exception e) {
+			log.error("Error send message", e);
+			throw new RuntimeException(e);
+		}
 	}
 
+	@Override
+	public LongPollingUpdateConsumer getUpdatesConsumer() {
+		return this;
 	}
 }

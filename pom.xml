@@ -13,7 +13,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <telegrambots.version>6.7.0</telegrambots.version>
+        <telegrambots.version>7.4.1</telegrambots.version>
     </properties>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -43,13 +43,23 @@
         </dependency>
         <dependency>
             <groupId>org.telegram</groupId>
-            <artifactId>telegrambots</artifactId>
+            <artifactId>telegrambots-springboot-longpolling-starter</artifactId>
+            <version>${telegrambots.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots-client</artifactId>
             <version>${telegrambots.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jool-java-8</artifactId>
             <version>0.9.14</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.2.1-jre</version>
         </dependency>
     </dependencies>
 
