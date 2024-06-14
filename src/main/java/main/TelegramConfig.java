@@ -20,6 +20,9 @@ public class TelegramConfig {
 
 	@Bean
 	public TelegramClient telegramClient() {
+		if (schema.equals("none")) {
+			return new OkHttpTelegramClient(botToken, TelegramUrl.DEFAULT_URL);
+		}
 		TelegramUrl telegramUrl = new TelegramUrl(schema, host, port);
 		return new OkHttpTelegramClient(botToken, telegramUrl);
 	}
