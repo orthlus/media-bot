@@ -2,8 +2,10 @@ package main;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import main.exceptions.InvalidUrl;
+import main.exceptions.NotSendException;
+import main.exceptions.UnknownHost;
 import main.social.ig.InstagramService;
-import main.social.ig.KnownHosts;
 import main.social.tiktok.TikTok;
 import main.social.yt.YouTubeService;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,10 +20,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +28,10 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Arrays.asList;
+import static main.BotUtils.getURL;
+import static main.BotUtils.parseUrlWithSign;
+import static main.BotUtils.isItHost;
+import static main.BotUtils.parseHost;
 import static main.social.ig.KnownHosts.YOUTUBE;
 
 @Slf4j
@@ -221,26 +224,6 @@ public class BotHandler extends TelegramLongPollingBot {
 		}
 	}
 
-	private boolean isItHost(URI uri, KnownHosts host) {
-		return parseHost(uri).equals(host);
-	}
-
-	private String parseUrlWithSign(String text) {
-		return text.startsWith("!") ? text.substring(1) : text;
-	}
-
-	private KnownHosts parseHost(URI uri) {
-		String cleanedUrl = uri.getHost().replace("www.", "");
-		for (KnownHosts knownHost : KnownHosts.values()) {
-			for (String host : knownHost.getHosts()) {
-				if (cleanedUrl.contains(host)) {
-					return knownHost;
-				}
-			}
-		}
-		throw new UnknownHost();
-	}
-
 	private void logMessageIfHasUrl(Update update) {
 		try {
 			getURL(update.getMessage().getText());
@@ -249,14 +232,6 @@ public class BotHandler extends TelegramLongPollingBot {
 			log.info("new message {} in chat {} from {}", update.getMessage().getText(), chatId, userId);
 		} catch (InvalidUrl | UnknownHost ignored) {
 
-		}
-	}
-
-	private URI getURL(String url) throws InvalidUrl {
-		try {
-			return new URL(url).toURI();
-		} catch (URISyntaxException | MalformedURLException e) {
-			throw new InvalidUrl();
 		}
 	}
 
@@ -308,9 +283,5 @@ public class BotHandler extends TelegramLongPollingBot {
 	public static class NotSendException extends RuntimeException {
 	}
 
-	public static class UnknownHost extends RuntimeException {
-	}
-
-	public static class InvalidUrl extends Exception {
 	}
 }
