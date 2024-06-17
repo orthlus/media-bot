@@ -1,5 +1,7 @@
 package main;
 
+import art.aelaort.SpringLongPollingBot;
+import art.aelaort.TelegramInit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +10,7 @@ import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.TelegramUrl;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 @Configuration
@@ -38,4 +41,9 @@ public class TelegramConfig {
     public TelegramBotsLongPollingApplication telegramBotsApplication() {
         return new TelegramBotsLongPollingApplication();
     }
+
+	@Bean
+	public TelegramInit telegramInit(List<SpringLongPollingBot> bots) {
+		return new TelegramInit(telegramBotsApplication(), bots, telegramUrlSupplier());
+	}
 }

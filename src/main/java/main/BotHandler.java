@@ -16,7 +16,6 @@ import main.social.yt.YouTubeService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
-import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -43,7 +42,7 @@ import static main.social.ig.KnownHosts.YOUTUBE;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class BotHandler implements LongPollingSingleThreadUpdateConsumer, SpringLongPollingBot {
+public class BotHandler implements SpringLongPollingBot {
 	@Getter
 	@Value("${bot.token}")
 	private String botToken;
