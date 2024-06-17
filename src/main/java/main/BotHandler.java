@@ -1,5 +1,6 @@
 package main;
 
+import art.aelaort.SpringLongPollingBot;
 import com.google.common.collect.Lists;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
@@ -15,7 +16,6 @@ import main.social.yt.YouTubeService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
-import org.telegram.telegrambots.longpolling.starter.SpringLongPollingBot;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;

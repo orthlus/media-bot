@@ -4,8 +4,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
+import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.TelegramUrl;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+
+import java.util.function.Supplier;
 
 @Configuration
 public class TelegramConfig {
@@ -19,11 +22,20 @@ public class TelegramConfig {
 	private String botToken;
 
 	@Bean
-	public TelegramClient telegramClient() {
-		if (schema.equals("none")) {
-			return new OkHttpTelegramClient(botToken, TelegramUrl.DEFAULT_URL);
-		}
-		TelegramUrl telegramUrl = new TelegramUrl(schema, host, port);
-		return new OkHttpTelegramClient(botToken, telegramUrl);
+	public TelegramClient telegramClient(Supplier<TelegramUrl> telegramUrlSupplier) {
+		return new OkHttpTelegramClient(botToken, telegramUrlSupplier.get());
 	}
+
+	@Bean
+	public Supplier<TelegramUrl> telegramUrlSupplier() {
+		if (schema.equals("none")) {
+			return () -> TelegramUrl.DEFAULT_URL;
+		}
+		return () -> new TelegramUrl(schema, host, port);
+	}
+
+	@Bean
+    public TelegramBotsLongPollingApplication telegramBotsApplication() {
+        return new TelegramBotsLongPollingApplication();
+    }
 }
