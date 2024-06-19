@@ -307,9 +307,4 @@ public class BotHandler implements SpringLongPollingBot {
 			throw new RuntimeException(e);
 		}
 	}
-
-	@Override
-	public LongPollingUpdateConsumer getUpdatesConsumer() {
-		return this;
-	}
 }
