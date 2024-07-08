@@ -143,7 +143,7 @@ public class BotHandler implements SpringLongPollingBot {
 		User user = update.getMessage().getFrom();
 		String username = user.getUserName().isEmpty() ?
 				"%s %s".formatted(user.getFirstName(), user.getLastName()).trim() :
-				user.getUserName();
+				"@" + user.getUserName();
 		return "%s прислал это из [%s](%s)".formatted(username, serviceName, uri.toString());
 	}
 
