@@ -15,7 +15,6 @@ import main.social.tiktok.VideoData;
 import main.social.yt.YouTubeService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -35,6 +34,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static art.aelaort.TelegramClientHelpers.execute;
 import static java.util.Arrays.asList;
 import static main.BotUtils.*;
 import static main.social.ig.KnownHosts.YOUTUBE;
@@ -234,14 +234,10 @@ public class BotHandler implements SpringLongPollingBot {
 
 	private void sendByUpdate(String text, Update update) {
 		Message message = update.getMessage();
-		try {
-			telegramClient.execute(SendMessage.builder()
-					.chatId(message.getChatId())
-					.text(text)
-					.build());
-		} catch (Exception e) {
-			log.error("{} - Error send message '{}'", this.getClass().getName(), message.getText(), e);
-		}
+		execute(SendMessage.builder()
+						.chatId(message.getChatId())
+						.text(text),
+				telegramClient);
 	}
 
 	public void deleteMessage(Update update) {
@@ -264,47 +260,34 @@ public class BotHandler implements SpringLongPollingBot {
 	}
 
 	public void sendVideoByUpdate(Update update, String message, InputFile inputFile) {
-		try {
-			SendVideo video = SendVideo.builder()
-					.chatId(update.getMessage().getChatId())
-					.caption(message)
-					.video(inputFile)
-					.build();
-			telegramClient.execute(video);
-		} catch (Exception e) {
-			log.error("Error send message", e);
-			throw new RuntimeException(e);
-		}
+		execute(SendVideo.builder()
+						.chatId(update.getMessage().getChatId())
+						.caption(message)
+						.video(inputFile),
+				telegramClient);
 	}
 
 	public void sendImagesByUpdate(Update update, List<String> imagesUrls) {
-		try {
-			if (imagesUrls.isEmpty()) {
-				return;
-			}
+		if (imagesUrls.isEmpty()) {
+			return;
+		}
 
-			if (imagesUrls.size() == 1) {
-				SendPhoto photo = SendPhoto.builder()
-						.chatId(update.getMessage().getChatId())
-						.photo(new InputFile(imagesUrls.get(0)))
-						.build();
-				telegramClient.execute(photo);
-			} else {
-				List<InputMediaPhoto> inputMediaPhotos = imagesUrls.stream()
-						.map(InputMediaPhoto::new)
-						.toList();
-				List<List<InputMediaPhoto>> partitions = Lists.partition(inputMediaPhotos, 10);
-				for (List<InputMediaPhoto> photos : partitions) {
-					SendMediaGroup media = SendMediaGroup.builder()
+		if (imagesUrls.size() == 1) {
+			execute(SendPhoto.builder()
 							.chatId(update.getMessage().getChatId())
-							.medias(photos)
-							.build();
-					telegramClient.execute(media);
-				}
+							.photo(new InputFile(imagesUrls.get(0))),
+					telegramClient);
+		} else {
+			List<InputMediaPhoto> inputMediaPhotos = imagesUrls.stream()
+					.map(InputMediaPhoto::new)
+					.toList();
+			List<List<InputMediaPhoto>> partitions = Lists.partition(inputMediaPhotos, 10);
+			for (List<InputMediaPhoto> photos : partitions) {
+				execute(SendMediaGroup.builder()
+								.chatId(update.getMessage().getChatId())
+								.medias(photos),
+						telegramClient);
 			}
-		} catch (Exception e) {
-			log.error("Error send message", e);
-			throw new RuntimeException(e);
 		}
 	}
 }
