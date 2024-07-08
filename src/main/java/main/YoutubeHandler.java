@@ -1,0 +1,36 @@
+package main;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import main.exceptions.NotSendException;
+import main.social.yt.YouTubeService;
+import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.generics.TelegramClient;
+
+import java.io.InputStream;
+import java.net.URI;
+import java.util.UUID;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class YoutubeHandler {
+	private final YouTubeService youTube;
+	private final TelegramClient telegramClient;
+
+	public void handle(URI uri, Update update) {
+		try {
+			InputStream file = youTube.downloadByUrl(uri);
+			sendVideoByUpdate(update, "", file);
+		} catch (Exception e) {
+			log.error("error send youtube url - {}", uri, e);
+			throw new NotSendException();
+		}
+	}
+
+	public void sendVideoByUpdate(Update update, String message, InputStream dataStream) {
+		BotUtils.sendVideoByUpdate(update, message, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
+	}
+}

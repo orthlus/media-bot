@@ -1,7 +1,6 @@
 package main;
 
 import art.aelaort.SpringLongPollingBot;
-import com.google.common.collect.Lists;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -9,32 +8,16 @@ import lombok.extern.slf4j.Slf4j;
 import main.exceptions.InvalidUrl;
 import main.exceptions.NotSendException;
 import main.exceptions.UnknownHost;
-import main.social.ig.InstagramService;
-import main.social.tiktok.TikTokService;
-import main.social.tiktok.VideoData;
-import main.social.yt.YouTubeService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
-import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
-import java.io.InputStream;
 import java.net.URI;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static art.aelaort.TelegramClientHelpers.execute;
 import static java.util.Arrays.asList;
 import static main.BotUtils.*;
 import static main.social.ig.KnownHosts.YOUTUBE;
@@ -47,9 +30,9 @@ public class BotHandler implements SpringLongPollingBot {
 	@Value("${bot.token}")
 	private String botToken;
 
-	private final InstagramService instagram;
-	private final YouTubeService youTube;
-	private final TikTokService tiktok;
+	private final InstagramHandler instagramHandler;
+	private final YoutubeHandler youtubeHandler;
+	private final TikTokHandler tikTokHandler;
 	private final TelegramClient telegramClient;
 
 	@Value("${bot.private_chat.id}")
@@ -147,78 +130,14 @@ public class BotHandler implements SpringLongPollingBot {
 
 	private void handleByHost(URI uri, Update update) {
 		switch (parseHost(uri)) {
-			case INSTAGRAM -> instagramUrl(uri, update);
-			case TIKTOK -> tiktokUrl(uri, update);
-			case YOUTUBE -> youtubeUrl(uri, update);
+			case INSTAGRAM -> instagramHandler.handle(uri, update);
+			case TIKTOK -> tikTokHandler.handle(uri, update);
+			case YOUTUBE -> youtubeHandler.handle(uri, update);
 		}
 	}
 
-	private void tiktokUrl(URI uri, Update update) {
-		VideoData data = tiktok.getData(uri);
-		if (tiktok.isVideo(data)) {
-			tiktokSendVideo(data, uri, update);
-		} else {
-			tiktokSendImages(data, update);
-		}
-	}
-
-	private void tiktokSendImages(VideoData data, Update update) {
-		List<String> imagesUrls = tiktok.getImagesUrls(data);
-		sendImagesByUpdate(update, imagesUrls, telegramClient);
-	}
-
-	private void tiktokSendVideo(VideoData data, URI uri, Update update) {
-		List<String> urls = tiktok.getVideoMediaUrls(data);
-
-		for (String url : urls) {
-			try {
-				InputStream file = tiktok.download(url);
-				sendVideoByUpdate(update, "", file);
-
-				return;
-			} catch (Exception e) {
-				log.error("error tiktok by {} - error send file", url, e);
-			}
-		}
-		log.error("error send tiktok file, trying send url - {}", uri);
-
-		for (String url : urls) {
-			try {
-				sendVideoByUpdate(update, "", url);
-
-				return;
-			} catch (Exception e) {
-				log.error("error tiktok by {} - error send url", url, e);
-			}
-		}
-
-		log.error("error send tiktok - {}", uri);
-	}
-
-	private void youtubeUrl(URI uri, Update update) {
-		try {
-			InputStream file = youTube.downloadByUrl(uri);
-			sendVideoByUpdate(update, "", file);
-		} catch (Exception e) {
-			log.error("error send youtube url - {}", uri, e);
-			throw new NotSendException();
-		}
-	}
-
-	private void instagramUrl(URI uri, Update update) {
-		try {
-			InputStream inputStream = instagram.download(uri);
-			sendVideoByUpdate(update, "", inputStream);
-		} catch (Exception e) {
-			log.error("error send instagram file, trying send url - {}", uri, e);
-			try {
-				String url = instagram.getMediaUrl(uri);
-				sendVideoByUpdate(update, "", url);
-			} catch (RuntimeException ex) {
-				log.error("error send instagram - {}", uri, e);
-				throw new NotSendException();
-			}
-		}
+	private String buildTextMessage(URI uri, Update update) {
+		return "";
 	}
 
 	private void logMessageIfHasUrl(Update update) {
@@ -234,13 +153,5 @@ public class BotHandler implements SpringLongPollingBot {
 
 	private void sendByUpdate(String text, Update update) {
 		BotUtils.sendByUpdate(text, update, telegramClient);
-	}
-
-	public void sendVideoByUpdate(Update update, String message, InputStream dataStream) {
-		BotUtils.sendVideoByUpdate(update, message, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
-	}
-
-	public void sendVideoByUpdate(Update update, String message, String videoUrl) {
-		BotUtils.sendVideoByUpdate(update, message, new InputFile(videoUrl), telegramClient);
 	}
 }
