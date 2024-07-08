@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static java.util.Arrays.asList;
 import static main.BotUtils.*;
 import static main.social.ig.KnownHosts.YOUTUBE;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Slf4j
 @Component
@@ -139,12 +141,24 @@ public class BotHandler implements SpringLongPollingBot {
 	}
 
 	private String buildTextMessage(URI uri, Update update) {
-		String serviceName = parseHost(uri).getText();
 		User user = update.getMessage().getFrom();
-		String username = user.getUserName().isEmpty() ?
-				"%s %s".formatted(user.getFirstName(), user.getLastName()).trim() :
-				"@" + user.getUserName();
-		return "%s прислал это из [%s](%s)".formatted(username, serviceName, uri.toString());
+		String lastName = user.getLastName();
+		String firstName = user.getFirstName();
+		String userName = user.getUserName();
+
+		String name;
+		if (isNotEmpty(userName)) {
+			name = "@" + userName;
+		} else {
+			if (isEmpty(lastName)) {
+				name = firstName;
+			} else {
+				name = firstName + " " + lastName;
+			}
+		}
+		String serviceName = parseHost(uri).getText();
+
+		return "%s прислал это из [%s](%s)".formatted(name, serviceName, uri.toString());
 	}
 
 	private void logMessageIfHasUrl(Update update) {
