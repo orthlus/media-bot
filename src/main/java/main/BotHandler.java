@@ -11,6 +11,7 @@ import main.exceptions.UnknownHost;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.net.URI;
@@ -103,7 +104,8 @@ public class BotHandler implements SpringLongPollingBot {
 		try {
 			URI uri = getURL(parseUrlWithSign(inputText));
 			logMessageIfHasUrl(update);
-			handleByHost(uri, update);
+			String text = buildTextMessage(uri, update);
+			handleByHost(uri, update, text);
 			deleteMessage(update, telegramClient);
 		} catch (InvalidUrl | UnknownHost ignored) {
 		} catch (NotSendException e) {
@@ -120,7 +122,7 @@ public class BotHandler implements SpringLongPollingBot {
 		try {
 			URI uri = getURL(inputText);
 			logMessageIfHasUrl(update);
-			handleByHost(uri, update);
+			handleByHost(uri, update, "");
 		} catch (InvalidUrl e) {
 			sendByUpdate("Какая-то неправильная у вас ссылка :(", update);
 		} catch (UnknownHost e) {
@@ -128,16 +130,21 @@ public class BotHandler implements SpringLongPollingBot {
 		}
 	}
 
-	private void handleByHost(URI uri, Update update) {
+	private void handleByHost(URI uri, Update update, String text) {
 		switch (parseHost(uri)) {
-			case INSTAGRAM -> instagramHandler.handle(uri, update);
-			case TIKTOK -> tikTokHandler.handle(uri, update);
-			case YOUTUBE -> youtubeHandler.handle(uri, update);
+			case INSTAGRAM -> instagramHandler.handle(uri, update, text);
+			case TIKTOK -> tikTokHandler.handle(uri, update, text);
+			case YOUTUBE -> youtubeHandler.handle(uri, update, text);
 		}
 	}
 
 	private String buildTextMessage(URI uri, Update update) {
-		return "";
+		String serviceName = parseHost(uri).getText();
+		User user = update.getMessage().getFrom();
+		String username = user.getUserName().isEmpty() ?
+				"%s %s".formatted(user.getFirstName(), user.getLastName()).trim() :
+				user.getUserName();
+		return "%s прислал это из [%s](%s)".formatted(username, serviceName, uri.toString());
 	}
 
 	private void logMessageIfHasUrl(Update update) {

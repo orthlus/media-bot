@@ -51,11 +51,12 @@ public class BotUtils {
 		execute(SendVideo.builder()
 						.chatId(update.getMessage().getChatId())
 						.caption(message)
+						.parseMode("markdown")
 						.video(inputFile),
 				telegramClient);
 	}
 
-	public static void sendImagesByUpdate(Update update, List<String> imagesUrls, TelegramClient telegramClient) {
+	public static void sendImagesByUpdate(Update update, List<String> imagesUrls, String text, TelegramClient telegramClient) {
 		if (imagesUrls.isEmpty()) {
 			return;
 		}
@@ -63,6 +64,8 @@ public class BotUtils {
 		if (imagesUrls.size() == 1) {
 			execute(SendPhoto.builder()
 							.chatId(update.getMessage().getChatId())
+							.caption(text)
+							.parseMode("markdown")
 							.photo(new InputFile(imagesUrls.get(0))),
 					telegramClient);
 		} else {
@@ -71,6 +74,8 @@ public class BotUtils {
 					.toList();
 			List<List<InputMediaPhoto>> partitions = Lists.partition(inputMediaPhotos, 10);
 			for (List<InputMediaPhoto> photos : partitions) {
+				photos.get(0).setCaption(text);
+				photos.get(0).setParseMode("markdown");
 				execute(SendMediaGroup.builder()
 								.chatId(update.getMessage().getChatId())
 								.medias(photos),

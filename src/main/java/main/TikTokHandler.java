@@ -22,26 +22,30 @@ public class TikTokHandler {
 	private final TelegramClient telegramClient;
 
 	public void handle(URI uri, Update update) {
+		handle(uri, update, "");
+	}
+
+	public void handle(URI uri, Update update, String text) {
 		VideoData data = tiktok.getData(uri);
 		if (tiktok.isVideo(data)) {
-			tiktokSendVideo(data, uri, update);
+			tiktokSendVideo(data, uri, update, text);
 		} else {
-			tiktokSendImages(data, update);
+			tiktokSendImages(data, update, text);
 		}
 	}
 
-	private void tiktokSendImages(VideoData data, Update update) {
+	private void tiktokSendImages(VideoData data, Update update, String text) {
 		List<String> imagesUrls = tiktok.getImagesUrls(data);
-		BotUtils.sendImagesByUpdate(update, imagesUrls, telegramClient);
+		BotUtils.sendImagesByUpdate(update, imagesUrls, text, telegramClient);
 	}
 
-	private void tiktokSendVideo(VideoData data, URI uri, Update update) {
+	private void tiktokSendVideo(VideoData data, URI uri, Update update, String text) {
 		List<String> urls = tiktok.getVideoMediaUrls(data);
 
 		for (String url : urls) {
 			try {
 				InputStream file = tiktok.download(url);
-				sendVideoByUpdate(update, "", file);
+				sendVideoByUpdate(update, text, file);
 
 				return;
 			} catch (Exception e) {
@@ -52,7 +56,7 @@ public class TikTokHandler {
 
 		for (String url : urls) {
 			try {
-				sendVideoByUpdate(update, "", url);
+				sendVideoByUpdate(update, text, url);
 
 				return;
 			} catch (Exception e) {

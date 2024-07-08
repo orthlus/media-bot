@@ -21,14 +21,18 @@ public class InstagramHandler {
 	private final TelegramClient telegramClient;
 
 	public void handle(URI uri, Update update) {
+		handle(uri, update, "");
+	}
+
+	public void handle(URI uri, Update update, String text) {
 		try {
 			InputStream inputStream = instagram.download(uri);
-			sendVideoByUpdate(update, "", inputStream);
+			sendVideoByUpdate(update, text, inputStream);
 		} catch (Exception e) {
 			log.error("error send instagram file, trying send url - {}", uri, e);
 			try {
 				String url = instagram.getMediaUrl(uri);
-				sendVideoByUpdate(update, "", url);
+				sendVideoByUpdate(update, text, url);
 			} catch (RuntimeException ex) {
 				log.error("error send instagram - {}", uri, e);
 				throw new NotSendException();

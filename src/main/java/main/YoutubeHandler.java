@@ -21,9 +21,13 @@ public class YoutubeHandler {
 	private final TelegramClient telegramClient;
 
 	public void handle(URI uri, Update update) {
+		handle(uri, update, "");
+	}
+
+	public void handle(URI uri, Update update, String text) {
 		try {
 			InputStream file = youTube.downloadByUrl(uri);
-			sendVideoByUpdate(update, "", file);
+			sendVideoByUpdate(update, text, file);
 		} catch (Exception e) {
 			log.error("error send youtube url - {}", uri, e);
 			throw new NotSendException();
