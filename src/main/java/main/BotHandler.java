@@ -121,7 +121,7 @@ public class BotHandler implements SpringLongPollingBot {
 			URI uri = getURL(parseUrlWithSign(inputText));
 			logMessageIfHasUrl(update);
 			handleByHost(uri, update);
-			deleteMessage(update);
+			deleteMessage(update, telegramClient);
 		} catch (InvalidUrl | UnknownHost ignored) {
 		} catch (NotSendException e) {
 			log.error("error sending message by {}", inputText);
@@ -164,7 +164,7 @@ public class BotHandler implements SpringLongPollingBot {
 
 	private void tiktokSendImages(VideoData data, Update update) {
 		List<String> imagesUrls = tiktok.getImagesUrls(data);
-		sendImagesByUpdate(update, imagesUrls);
+		sendImagesByUpdate(update, imagesUrls, telegramClient);
 	}
 
 	private void tiktokSendVideo(VideoData data, URI uri, Update update) {
@@ -233,61 +233,14 @@ public class BotHandler implements SpringLongPollingBot {
 	}
 
 	private void sendByUpdate(String text, Update update) {
-		Message message = update.getMessage();
-		execute(SendMessage.builder()
-						.chatId(message.getChatId())
-						.text(text),
-				telegramClient);
-	}
-
-	public void deleteMessage(Update update) {
-		long chatId = update.getMessage().getChatId();
-		int messageId = update.getMessage().getMessageId();
-		try {
-			telegramClient.execute(new DeleteMessage(String.valueOf(chatId), messageId));
-			log.debug("{} - Deleted message, chat {} messageId {}", this.getClass().getName(), chatId, messageId);
-		} catch (Exception e) {
-			log.error("{} - Error delete message, chat {} messageId {}", this.getClass().getName(), chatId, messageId, e);
-		}
+		BotUtils.sendByUpdate(text, update, telegramClient);
 	}
 
 	public void sendVideoByUpdate(Update update, String message, InputStream dataStream) {
-		sendVideoByUpdate(update, message, new InputFile(dataStream, UUID.randomUUID() + ".mp4"));
+		BotUtils.sendVideoByUpdate(update, message, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 
 	public void sendVideoByUpdate(Update update, String message, String videoUrl) {
-		sendVideoByUpdate(update, message, new InputFile(videoUrl));
-	}
-
-	public void sendVideoByUpdate(Update update, String message, InputFile inputFile) {
-		execute(SendVideo.builder()
-						.chatId(update.getMessage().getChatId())
-						.caption(message)
-						.video(inputFile),
-				telegramClient);
-	}
-
-	public void sendImagesByUpdate(Update update, List<String> imagesUrls) {
-		if (imagesUrls.isEmpty()) {
-			return;
-		}
-
-		if (imagesUrls.size() == 1) {
-			execute(SendPhoto.builder()
-							.chatId(update.getMessage().getChatId())
-							.photo(new InputFile(imagesUrls.get(0))),
-					telegramClient);
-		} else {
-			List<InputMediaPhoto> inputMediaPhotos = imagesUrls.stream()
-					.map(InputMediaPhoto::new)
-					.toList();
-			List<List<InputMediaPhoto>> partitions = Lists.partition(inputMediaPhotos, 10);
-			for (List<InputMediaPhoto> photos : partitions) {
-				execute(SendMediaGroup.builder()
-								.chatId(update.getMessage().getChatId())
-								.medias(photos),
-						telegramClient);
-			}
-		}
+		BotUtils.sendVideoByUpdate(update, message, new InputFile(videoUrl), telegramClient);
 	}
 }
