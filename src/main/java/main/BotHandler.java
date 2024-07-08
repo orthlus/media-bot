@@ -141,24 +141,29 @@ public class BotHandler implements SpringLongPollingBot {
 	}
 
 	private String buildTextMessage(URI uri, Update update) {
-		User user = update.getMessage().getFrom();
-		String lastName = user.getLastName();
-		String firstName = user.getFirstName();
-		String userName = user.getUserName();
+		try {
+			User user = update.getMessage().getFrom();
+			String lastName = user.getLastName();
+			String firstName = user.getFirstName();
+			String userName = user.getUserName();
 
-		String name;
-		if (isNotEmpty(userName)) {
-			name = "@" + userName;
-		} else {
-			if (isEmpty(lastName)) {
-				name = firstName;
+			String name;
+			if (isNotEmpty(userName)) {
+				name = "@" + userName;
 			} else {
-				name = firstName + " " + lastName;
+				if (isEmpty(lastName)) {
+					name = firstName;
+				} else {
+					name = firstName + " " + lastName;
+				}
 			}
-		}
-		String serviceName = parseHost(uri).getText();
+			String serviceName = parseHost(uri).getText();
 
-		return "%s прислал это из [%s](%s)".formatted(name, serviceName, uri.toString());
+			return "%s прислал это из [%s](%s)".formatted(name, serviceName, uri.toString());
+		} catch (Exception e) {
+			log.error("error in buildTextMessage", e);
+			return "";
+		}
 	}
 
 	private void logMessageIfHasUrl(Update update) {
