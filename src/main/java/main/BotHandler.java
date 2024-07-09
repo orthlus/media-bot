@@ -149,7 +149,7 @@ public class BotHandler implements SpringLongPollingBot {
 
 			String name;
 			if (isNotEmpty(userName)) {
-				name = "@" + userName;
+				name = "t.me/" + userName;
 			} else {
 				if (isEmpty(lastName)) {
 					name = firstName;
