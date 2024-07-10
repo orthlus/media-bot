@@ -32,7 +32,7 @@ public class YouTubeService {
 	}
 
 	private Optional<Path> downloadByUrl(URI url, String dir) {
-		String command = "yt-dlp --print filename -S res:1080 -P " + dir + " -o 'video-id-%(id)s.%(ext)s' --no-simulate " + url;
+		String command = "yt-dlp --print filename -S res:1080 -P " + dir + " -o video-id-%(id)s.%(ext)s --no-simulate " + url;
 		Response response = system.callProcess(command);
 		if (response.exitCode() != 0) {
 			log.error("Error downloading youtube {}", response);
