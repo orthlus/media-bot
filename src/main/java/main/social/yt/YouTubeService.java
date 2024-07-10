@@ -44,6 +44,7 @@ public class YouTubeService {
 		if (Files.exists(path)) {
 			return Optional.of(path);
 		} else {
+			log.error("download error stdout: {}, stderr: {}", response.stdout(), response.stderr());
 			throw new RuntimeException();
 		}
 	}
