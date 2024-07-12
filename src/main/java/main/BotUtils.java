@@ -16,13 +16,12 @@ import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
-import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static art.aelaort.TelegramClientHelpers.execute;
 
@@ -80,7 +79,16 @@ public class BotUtils {
 								.chatId(update.getMessage().getChatId())
 								.medias(photos),
 						telegramClient);
+//				sleep(photos.size());
 			}
+		}
+	}
+
+	private static void sleep(long seconds) {
+		try {
+			TimeUnit.SECONDS.sleep(seconds);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
