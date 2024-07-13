@@ -72,21 +72,23 @@ public class BotUtils {
 					.map(InputMediaPhoto::new)
 					.toList();
 
-			if (update.getMessage().isGroupMessage()) {
-				List<List<InputMediaPhoto>> partitionsForLimit = Lists.partition(inputMediaPhotos, 20);
-				for (List<InputMediaPhoto> partitionForLimit : partitionsForLimit) {
-					List<List<InputMediaPhoto>> partitions = Lists.partition(partitionForLimit, 10);
-					for (List<InputMediaPhoto> photos : partitions) {
-						photos.get(0).setCaption(text);
-						photos.get(0).setParseMode("markdown");
-						execute(SendMediaGroup.builder()
-										.chatId(update.getMessage().getChatId())
-										.medias(photos),
-								telegramClient);
-						sleep(15);
-					}
-					sleep(60);
+			if (update.getMessage().isGroupMessage() || update.getMessage().isSuperGroupMessage()) {
+				List<InputMediaPhoto> photosToSend;
+				if (inputMediaPhotos.size() > 10) {
+					photosToSend = inputMediaPhotos.subList(0, 10);
+					execute(SendMessage.builder()
+							.text("Больше 10 фото в группу не имею присылать((")
+							.chatId(update.getMessage().getChatId()),
+							telegramClient);
+				} else {
+					photosToSend = inputMediaPhotos;
 				}
+				photosToSend.get(0).setCaption(text);
+				photosToSend.get(0).setParseMode("markdown");
+				execute(SendMediaGroup.builder()
+								.chatId(update.getMessage().getChatId())
+								.medias(photosToSend),
+						telegramClient);
 			} else {
 				List<List<InputMediaPhoto>> partitions = Lists.partition(inputMediaPhotos, 10);
 				for (List<InputMediaPhoto> photos : partitions) {
