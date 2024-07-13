@@ -71,15 +71,32 @@ public class BotUtils {
 			List<InputMediaPhoto> inputMediaPhotos = imagesUrls.stream()
 					.map(InputMediaPhoto::new)
 					.toList();
-			List<List<InputMediaPhoto>> partitions = Lists.partition(inputMediaPhotos, 10);
-			for (List<InputMediaPhoto> photos : partitions) {
-				photos.get(0).setCaption(text);
-				photos.get(0).setParseMode("markdown");
-				execute(SendMediaGroup.builder()
-								.chatId(update.getMessage().getChatId())
-								.medias(photos),
-						telegramClient);
-//				sleep(photos.size());
+
+			if (update.getMessage().isGroupMessage()) {
+				List<List<InputMediaPhoto>> partitionsForLimit = Lists.partition(inputMediaPhotos, 20);
+				for (List<InputMediaPhoto> partitionForLimit : partitionsForLimit) {
+					List<List<InputMediaPhoto>> partitions = Lists.partition(partitionForLimit, 10);
+					for (List<InputMediaPhoto> photos : partitions) {
+						photos.get(0).setCaption(text);
+						photos.get(0).setParseMode("markdown");
+						execute(SendMediaGroup.builder()
+										.chatId(update.getMessage().getChatId())
+										.medias(photos),
+								telegramClient);
+						sleep(15);
+					}
+					sleep(60);
+				}
+			} else {
+				List<List<InputMediaPhoto>> partitions = Lists.partition(inputMediaPhotos, 10);
+				for (List<InputMediaPhoto> photos : partitions) {
+					photos.get(0).setCaption(text);
+					photos.get(0).setParseMode("markdown");
+					execute(SendMediaGroup.builder()
+									.chatId(update.getMessage().getChatId())
+									.medias(photos),
+							telegramClient);
+				}
 			}
 		}
 	}
