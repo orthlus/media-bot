@@ -159,7 +159,7 @@ public class BotHandler implements SpringLongPollingBot {
 			}
 			String serviceName = parseHost(uri).getText();
 
-			return "%s прислал это из [%s](%s)".formatted(name, serviceName, uri.toString());
+			return "[%s](%s) прислал это из [%s](%s)".formatted(userName, name, serviceName, uri.toString());
 		} catch (Exception e) {
 			log.error("error in buildTextMessage", e);
 			return "";
