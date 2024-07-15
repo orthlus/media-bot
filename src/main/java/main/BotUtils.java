@@ -76,8 +76,9 @@ public class BotUtils {
 				if (inputMediaPhotos.size() > 10) {
 					sendPhotos(update, inputMediaPhotos.subList(0, 10), text, telegramClient);
 					sleep(500);
+					String s = "Больше 10 фото в группу не имею присылать((\nА прислано было %d фото".formatted(imagesUrls.size());
 					execute(SendMessage.builder()
-							.text("Больше 10 фото в группу не имею присылать((")
+							.text(s)
 							.chatId(update.getMessage().getChatId()),
 							telegramClient);
 				} else {
