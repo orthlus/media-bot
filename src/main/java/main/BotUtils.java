@@ -73,39 +73,37 @@ public class BotUtils {
 					.toList();
 
 			if (update.getMessage().isGroupMessage() || update.getMessage().isSuperGroupMessage()) {
-				List<InputMediaPhoto> photosToSend;
 				if (inputMediaPhotos.size() > 10) {
-					photosToSend = inputMediaPhotos.subList(0, 10);
+					sendPhotos(update, inputMediaPhotos.subList(0, 10), text, telegramClient);
+					sleep(500);
 					execute(SendMessage.builder()
 							.text("Больше 10 фото в группу не имею присылать((")
 							.chatId(update.getMessage().getChatId()),
 							telegramClient);
 				} else {
-					photosToSend = inputMediaPhotos;
+					sendPhotos(update, inputMediaPhotos, text, telegramClient);
 				}
-				photosToSend.get(0).setCaption(text);
-				photosToSend.get(0).setParseMode("markdown");
-				execute(SendMediaGroup.builder()
-								.chatId(update.getMessage().getChatId())
-								.medias(photosToSend),
-						telegramClient);
 			} else {
 				List<List<InputMediaPhoto>> partitions = Lists.partition(inputMediaPhotos, 10);
 				for (List<InputMediaPhoto> photos : partitions) {
-					photos.get(0).setCaption(text);
-					photos.get(0).setParseMode("markdown");
-					execute(SendMediaGroup.builder()
-									.chatId(update.getMessage().getChatId())
-									.medias(photos),
-							telegramClient);
+					sendPhotos(update, photos, text, telegramClient);
 				}
 			}
 		}
 	}
 
-	private static void sleep(long seconds) {
+	private static void sendPhotos(Update update, List<InputMediaPhoto> photos, String text, TelegramClient telegramClient) {
+		photos.get(0).setCaption(text);
+		photos.get(0).setParseMode("markdown");
+		execute(SendMediaGroup.builder()
+						.chatId(update.getMessage().getChatId())
+						.medias(photos),
+				telegramClient);
+	}
+
+	private static void sleep(long milliseconds) {
 		try {
-			TimeUnit.SECONDS.sleep(seconds);
+			TimeUnit.MILLISECONDS.sleep(milliseconds);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
