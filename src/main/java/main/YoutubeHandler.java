@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.UUID;
 
 @Slf4j
@@ -26,12 +27,16 @@ public class YoutubeHandler {
 
 	public void handle(URI uri, Update update, String text) {
 		try {
-			InputStream file = youTube.downloadByUrl(uri);
+			Path file = youTube.downloadFileByUrl(uri);
 			sendVideoByUpdate(update, text, file);
 		} catch (Exception e) {
 			log.error("error send youtube url - {}", uri, e);
 			throw new NotSendException();
 		}
+	}
+
+	public void sendVideoByUpdate(Update update, String message, Path path) {
+		BotUtils.sendVideoByUpdate(update, message, new InputFile(path.toFile(), UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 
 	public void sendVideoByUpdate(Update update, String message, InputStream dataStream) {
