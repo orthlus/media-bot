@@ -107,7 +107,7 @@ public class BotHandler implements SpringLongPollingBot {
 			URI uri = getURL(parseUrlWithSign(inputText));
 			logMessageIfHasUrl(update);
 			String text = buildTextMessage(uri, update);
-			handleByHost(uri, update, text);
+			handleByHost(uri, update, text, true);
 			deleteMessage(update, telegramClient);
 		} catch (InvalidUrl | UnknownHost ignored) {
 		} catch (NotSendException e) {
@@ -124,7 +124,7 @@ public class BotHandler implements SpringLongPollingBot {
 		try {
 			URI uri = getURL(inputText);
 			logMessageIfHasUrl(update);
-			handleByHost(uri, update, "");
+			handleByHost(uri, update, "", false);
 		} catch (InvalidUrl e) {
 			sendByUpdate("Какая-то неправильная у вас ссылка :(", update);
 		} catch (UnknownHost e) {
@@ -132,11 +132,11 @@ public class BotHandler implements SpringLongPollingBot {
 		}
 	}
 
-	private void handleByHost(URI uri, Update update, String text) {
+	private void handleByHost(URI uri, Update update, String text, boolean isDeleteSourceMessage) {
 		switch (parseHost(uri)) {
 			case INSTAGRAM -> instagramHandler.handle(uri, update, text);
 			case TIKTOK -> tikTokHandler.handle(uri, update, text);
-			case YOUTUBE -> youtubeHandler.handle(uri, update, text, telegramClient);
+			case YOUTUBE -> youtubeHandler.handle(uri, update, text, telegramClient, isDeleteSourceMessage);
 		}
 	}
 

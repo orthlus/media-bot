@@ -7,6 +7,7 @@ import main.social.yt.YouTubeService;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
@@ -25,20 +26,28 @@ public class YoutubeHandler {
 	private final YouTubeService youTube;
 	private final TelegramClient telegramClient;
 
-	private void checkVideoDuration(URI uri, Update update, TelegramClient telegramClient) {
+	private void checkVideoDuration(URI uri, Update update, TelegramClient telegramClient, boolean isDeleteSourceMessage) {
 		int videoDurationSeconds = youTube.getVideoDurationSeconds(uri);
 		if (videoDurationSeconds > 120) {
 			String durationText = DurationFormatUtils.formatDurationWords(videoDurationSeconds * 1000L, true, true);
 			execute(SendMessage.builder()
 							.chatId(update.getMessage().getChatId())
-							.text("wow, duration is %s. loading...".formatted(durationText)),
+							.text("wow, [video](%s) duration is %s. loading...".formatted(uri, durationText))
+							.parseMode("markdown")
+							.disableWebPagePreview(true),
 					telegramClient);
+			if (isDeleteSourceMessage) {
+				execute(DeleteMessage.builder()
+								.chatId(update.getMessage().getChatId())
+								.messageId(update.getMessage().getMessageId()),
+						telegramClient);
+			}
 		}
 	}
 
-	public void handle(URI uri, Update update, String text, TelegramClient telegramClient) {
+	public void handle(URI uri, Update update, String text, TelegramClient telegramClient, boolean isDeleteSourceMessage) {
 		try {
-			checkVideoDuration(uri, update, telegramClient);
+			checkVideoDuration(uri, update, telegramClient, isDeleteSourceMessage);
 			Path file = youTube.downloadFileByUrl(uri);
 			sendVideoByUpdate(update, text, file);
 		} catch (Exception e) {
