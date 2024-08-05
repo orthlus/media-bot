@@ -45,8 +45,20 @@ public class YouTubeService {
 		}
 	}
 
-	public Path downloadFileByUrl(URI url) {
-		Optional<Path> fileOp = downloadByUrl(url, "/tmp");
+	public int getVideoDurationSeconds(URI uri) {
+		String command = "yt-dlp -q --no-warnings --print duration " + uri;
+		Response response = system.callProcess(command);
+		if (response.exitCode() != 0) {
+			log.error("Error youtube get duration {}", response);
+
+			return -1;
+		}
+
+		return Integer.parseInt(response.stdout());
+	}
+
+	public Path downloadFileByUrl(URI uri) {
+		Optional<Path> fileOp = downloadByUrl(uri, "/tmp");
 		if (fileOp.isPresent()) {
 			return fileOp.get();
 		}
@@ -54,8 +66,8 @@ public class YouTubeService {
 		throw new RuntimeException();
 	}
 
-	public InputStream downloadByUrl(URI url) throws IOException {
-		Optional<Path> fileOp = downloadByUrl(url, "/tmp");
+	public InputStream downloadByUrl(URI uri) throws IOException {
+		Optional<Path> fileOp = downloadByUrl(uri, "/tmp");
 		if (fileOp.isPresent()) {
 			byte[] bytes = Files.readAllBytes(fileOp.get());
 			Files.deleteIfExists(fileOp.get());
@@ -65,8 +77,8 @@ public class YouTubeService {
 		return ByteArrayInputStream.nullInputStream();
 	}
 
-	private Optional<Path> downloadByUrl(URI url, String dir) {
-		String command = "yt-dlp --print filename -S res:1080 -P " + dir + " -o video-id-%(id)s.%(ext)s --no-simulate " + url;
+	private Optional<Path> downloadByUrl(URI uri, String dir) {
+		String command = "yt-dlp --print filename -S res:1080 -P " + dir + " -o video-id-%(id)s.%(ext)s --no-simulate " + uri;
 		Response response = system.callProcess(command);
 		if (response.exitCode() != 0) {
 			log.error("Error downloading youtube {}", response);

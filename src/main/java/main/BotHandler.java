@@ -136,7 +136,7 @@ public class BotHandler implements SpringLongPollingBot {
 		switch (parseHost(uri)) {
 			case INSTAGRAM -> instagramHandler.handle(uri, update, text);
 			case TIKTOK -> tikTokHandler.handle(uri, update, text);
-			case YOUTUBE -> youtubeHandler.handle(uri, update, text);
+			case YOUTUBE -> youtubeHandler.handle(uri, update, text, telegramClient);
 		}
 	}
 
