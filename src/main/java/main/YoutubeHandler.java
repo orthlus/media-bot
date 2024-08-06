@@ -1,6 +1,7 @@
 package main;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import main.exceptions.NotSendException;
 import main.social.yt.YouTubeService;
@@ -14,6 +15,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
@@ -49,11 +51,26 @@ public class YoutubeHandler {
 		try {
 			checkVideoDuration(uri, update, telegramClient, isDeleteSourceMessage);
 			Path file = youTube.downloadFileByUrl(uri);
-			sendVideoByUpdate(update, text, file);
+			if (isFileTooLarge(file)) {
+				execute(SendMessage.builder()
+								.chatId(update.getMessage().getChatId())
+								.text("[Файл](%s) больше 2 ГБ, невозможно отправить".formatted(uri))
+								.parseMode("markdown")
+								.disableWebPagePreview(true),
+						telegramClient);
+				Files.deleteIfExists(file);
+			} else {
+				sendVideoByUpdate(update, text, file);
+			}
 		} catch (Exception e) {
 			log.error("error send youtube url - {}", uri, e);
 			throw new NotSendException();
 		}
+	}
+
+	@SneakyThrows
+	private boolean isFileTooLarge(Path file) {
+		return Files.size(file) > 2L * 1024 * 1024 * 1024;
 	}
 
 	public void sendVideoByUpdate(Update update, String message, Path path) {
