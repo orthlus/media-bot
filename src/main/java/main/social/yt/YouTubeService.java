@@ -29,7 +29,7 @@ public class YouTubeService {
 	@Scheduled(fixedRate = 1, timeUnit = TimeUnit.HOURS)
 	public void cleanup() {
 		try {
-			Files.walk(Path.of("/tmp"))
+			Files.walk(Path.of("/tmp"), 1)
 					.filter(path -> path.toFile().isFile())
 					.filter(this::isFileOlder5Hours)
 					.forEach(path -> {
