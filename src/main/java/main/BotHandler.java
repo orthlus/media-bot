@@ -5,9 +5,9 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import main.exceptions.InvalidUrl;
+import main.exceptions.InvalidUrlException;
 import main.exceptions.NotSendException;
-import main.exceptions.UnknownHost;
+import main.exceptions.UnknownHostException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -97,7 +97,7 @@ public class BotHandler implements SpringLongPollingBot {
 			} else {
 				groupChat(update);
 			}
-		} catch (InvalidUrl | UnknownHost ignored) {
+		} catch (InvalidUrlException | UnknownHostException ignored) {
 		}
 	}
 
@@ -109,7 +109,7 @@ public class BotHandler implements SpringLongPollingBot {
 			String text = buildTextMessage(uri, update);
 			handleByHost(uri, update, text, true);
 			deleteMessage(update, telegramClient);
-		} catch (InvalidUrl | UnknownHost ignored) {
+		} catch (InvalidUrlException | UnknownHostException ignored) {
 		} catch (NotSendException e) {
 			log.error("error sending message by {}", inputText);
 		}
@@ -125,9 +125,9 @@ public class BotHandler implements SpringLongPollingBot {
 			URI uri = getURL(inputText);
 			logMessageIfHasUrl(update);
 			handleByHost(uri, update, "", false);
-		} catch (InvalidUrl e) {
+		} catch (InvalidUrlException e) {
 			sendByUpdate("Какая-то неправильная у вас ссылка :(", update);
-		} catch (UnknownHost e) {
+		} catch (UnknownHostException e) {
 			sendByUpdate("Неизвестный хост", update);
 		}
 	}
@@ -172,7 +172,7 @@ public class BotHandler implements SpringLongPollingBot {
 			long chatId = update.getMessage().getChat().getId();
 			long userId = update.getMessage().getFrom().getId();
 			log.info("new message {} in chat {} from {}", update.getMessage().getText(), chatId, userId);
-		} catch (InvalidUrl | UnknownHost ignored) {
+		} catch (InvalidUrlException | UnknownHostException ignored) {
 
 		}
 	}

@@ -2,8 +2,8 @@ package main;
 
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
-import main.exceptions.InvalidUrl;
-import main.exceptions.UnknownHost;
+import main.exceptions.InvalidUrlException;
+import main.exceptions.UnknownHostException;
 import main.social.ig.KnownHosts;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -114,11 +114,11 @@ public class BotUtils {
 		return text.startsWith("!") ? text.substring(1) : text;
 	}
 
-	public static URI getURL(String url) throws InvalidUrl {
+	public static URI getURL(String url) throws InvalidUrlException {
 		try {
 			return new URL(url).toURI();
 		} catch (URISyntaxException | MalformedURLException e) {
-			throw new InvalidUrl();
+			throw new InvalidUrlException();
 		}
 	}
 
@@ -135,6 +135,6 @@ public class BotUtils {
 				}
 			}
 		}
-		throw new UnknownHost();
+		throw new UnknownHostException();
 	}
 }
