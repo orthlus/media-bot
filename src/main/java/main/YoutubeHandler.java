@@ -29,20 +29,22 @@ public class YoutubeHandler {
 	private final TelegramClient telegramClient;
 
 	private void checkVideoDuration(URI uri, Update update, TelegramClient telegramClient, boolean isDeleteSourceMessage) {
-		int videoDurationSeconds = youTube.getVideoDurationSeconds(uri);
-		if (videoDurationSeconds > 120) {
-			String durationText = DurationFormatUtils.formatDurationWords(videoDurationSeconds * 1000L, true, true);
-			execute(SendMessage.builder()
-							.chatId(update.getMessage().getChatId())
-							.text("wow, [video](%s) duration is %s. loading...".formatted(uri, durationText))
-							.parseMode("markdown")
-							.disableWebPagePreview(true),
-					telegramClient);
-			if (isDeleteSourceMessage) {
-				execute(DeleteMessage.builder()
+		if (!uri.getPath().startsWith("/shorts")) {
+			int videoDurationSeconds = youTube.getVideoDurationSeconds(uri);
+			if (videoDurationSeconds > 120) {
+				String durationText = DurationFormatUtils.formatDurationWords(videoDurationSeconds * 1000L, true, true);
+				execute(SendMessage.builder()
 								.chatId(update.getMessage().getChatId())
-								.messageId(update.getMessage().getMessageId()),
+								.text("wow, [video](%s) duration is %s. loading...".formatted(uri, durationText))
+								.parseMode("markdown")
+								.disableWebPagePreview(true),
 						telegramClient);
+				if (isDeleteSourceMessage) {
+					execute(DeleteMessage.builder()
+									.chatId(update.getMessage().getChatId())
+									.messageId(update.getMessage().getMessageId()),
+							telegramClient);
+				}
 			}
 		}
 	}
