@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import main.exceptions.NotSendException;
+import main.exceptions.TooLargeFileException;
 import main.social.yt.YouTubeService;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
@@ -49,21 +51,26 @@ public class YoutubeHandler {
 		}
 	}
 
+	private void checkFileSize(Path file) throws IOException {
+		if (isFileTooLarge(file)) {
+			Files.deleteIfExists(file);
+			throw new TooLargeFileException();
+		}
+	}
+
 	public void handle(URI uri, Update update, String text, TelegramClient telegramClient, boolean isDeleteSourceMessage) {
 		try {
 			checkVideoDuration(uri, update, telegramClient, isDeleteSourceMessage);
 			Path file = youTube.downloadFileByUrl(uri);
-			if (isFileTooLarge(file)) {
-				execute(SendMessage.builder()
-								.chatId(update.getMessage().getChatId())
-								.text("[Файл](%s) больше 2 ГБ, невозможно отправить".formatted(uri))
-								.parseMode("markdown")
-								.disableWebPagePreview(true),
-						telegramClient);
-				Files.deleteIfExists(file);
-			} else {
-				sendVideoByUpdate(update, text, file);
-			}
+			checkFileSize(file);
+			sendVideoByUpdate(update, text, file);
+		} catch (TooLargeFileException e) {
+			execute(SendMessage.builder()
+							.chatId(update.getMessage().getChatId())
+							.text("[Файл](%s) больше 2 ГБ, невозможно отправить".formatted(uri))
+							.parseMode("markdown")
+							.disableWebPagePreview(true),
+					telegramClient);
 		} catch (Exception e) {
 			log.error("error send youtube url - {}", uri, e);
 			throw new NotSendException();
