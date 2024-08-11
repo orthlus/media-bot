@@ -3,10 +3,14 @@ package main.social.yt;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import main.Main;
+import main.exceptions.YoutubeFileDownloadException;
 import main.system.Response;
 import main.system.SystemProcess;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,11 +29,15 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class YouTubeService {
 	private final SystemProcess system;
+	@Qualifier("ytdlp")
+	private final RestTemplate restTemplate;
+	@Value("${ytdlp.dir}")
+	private String ytdlpDir;
 
 	@Scheduled(fixedRate = 1, timeUnit = TimeUnit.HOURS)
 	public void cleanup() {
 		try {
-			Files.walk(Path.of("/tmp"), 1)
+			Files.walk(Path.of(ytdlpDir), 1)
 					.filter(path -> path.toFile().isFile())
 					.filter(this::isFileOlder5Hours)
 					.forEach(path -> {
@@ -46,24 +54,18 @@ public class YouTubeService {
 	}
 
 	public int getVideoDurationSeconds(URI uri) {
-		String command = "yt-dlp -q --no-warnings --print duration " + uri;
-		Response response = system.callProcess(command);
-		if (response.exitCode() != 0) {
-			log.error("Error youtube get duration {}", response);
+		String duration = restTemplate.getForObject("/video/duration?uri=" + uri, String.class);
 
-			return -1;
-		}
-
-		return Integer.parseInt(response.stdout());
+		return duration == null ? -1 : Integer.parseInt(duration);
 	}
 
 	public Path downloadFileByUrl(URI uri) {
-		Optional<Path> fileOp = downloadByUrl(uri, "/tmp");
-		if (fileOp.isPresent()) {
-			return fileOp.get();
+		String filepath = restTemplate.getForObject("/download?uri=" + uri, String.class);
+		if (filepath == null) {
+			throw new YoutubeFileDownloadException();
+		} else {
+			return Path.of(filepath);
 		}
-
-		throw new RuntimeException();
 	}
 
 	public InputStream downloadByUrl(URI uri) throws IOException {

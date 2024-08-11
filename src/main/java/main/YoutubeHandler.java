@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import main.exceptions.NotSendException;
 import main.exceptions.TooLargeFileException;
+import main.exceptions.YoutubeFileDownloadException;
 import main.social.yt.YouTubeService;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.springframework.stereotype.Component;
@@ -64,6 +65,13 @@ public class YoutubeHandler {
 			Path file = youTube.downloadFileByUrl(uri);
 			checkFileSize(file);
 			sendVideoByUpdate(update, text, file);
+		} catch (YoutubeFileDownloadException e) {
+			log.error("youtube download error - YoutubeFileDownloadException");
+			execute(SendMessage.builder()
+							.chatId(update.getMessage().getChatId())
+							.text("Почему то не удалось скачать [файл](%s)".formatted(uri))
+							.disableWebPagePreview(true),
+					telegramClient);
 		} catch (TooLargeFileException e) {
 			execute(SendMessage.builder()
 							.chatId(update.getMessage().getChatId())

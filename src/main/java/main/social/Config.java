@@ -33,4 +33,14 @@ public class Config {
 				.defaultHeader("authorization", "Bearer " + tiktokApiToken)
 				.build();
 	}
+
+	@Bean
+	public RestTemplate ytdlp(RestTemplateBuilder restTemplateBuilder,
+							  @Value("${ytdlp.url}") String url) {
+		return restTemplateBuilder
+				.rootUri(url)
+				.setConnectTimeout(Duration.ofMinutes(5))
+				.setReadTimeout(Duration.ofMinutes(5))
+				.build();
+	}
 }
