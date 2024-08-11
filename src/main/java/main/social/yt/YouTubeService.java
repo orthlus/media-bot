@@ -64,7 +64,7 @@ public class YouTubeService {
 		if (filepath == null) {
 			throw new YoutubeFileDownloadException();
 		} else {
-			return Path.of(filepath);
+			return Path.of(filepath.trim());
 		}
 	}
 
