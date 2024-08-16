@@ -56,7 +56,7 @@ public class YouTubeService {
 	public int getVideoDurationSeconds(URI uri) {
 		String duration = restTemplate.getForObject("/video/duration?uri=" + uri, String.class);
 
-		return duration == null ? -1 : Integer.parseInt(duration);
+		return duration == null ? -1 : Integer.parseInt(duration.trim());
 	}
 
 	public Path downloadFileByUrl(URI uri) {
