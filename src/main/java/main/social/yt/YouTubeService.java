@@ -4,31 +4,25 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import main.Main;
 import main.exceptions.YoutubeFileDownloadException;
-import main.system.Response;
-import main.system.SystemProcess;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class YouTubeService {
-	private final SystemProcess system;
 	@Qualifier("ytdlp")
 	private final RestTemplate restTemplate;
 	@Value("${ytdlp.dir}")
@@ -65,35 +59,6 @@ public class YouTubeService {
 			throw new YoutubeFileDownloadException();
 		} else {
 			return Path.of(filepath.trim());
-		}
-	}
-
-	public InputStream downloadByUrl(URI uri) throws IOException {
-		Optional<Path> fileOp = downloadByUrl(uri, "/tmp");
-		if (fileOp.isPresent()) {
-			byte[] bytes = Files.readAllBytes(fileOp.get());
-			Files.deleteIfExists(fileOp.get());
-
-			return new ByteArrayInputStream(bytes);
-		}
-		return ByteArrayInputStream.nullInputStream();
-	}
-
-	private Optional<Path> downloadByUrl(URI uri, String dir) {
-		String command = "yt-dlp --print filename -S res:1080 -P " + dir + " -o video-id-%(id)s.%(ext)s --no-simulate " + uri;
-		Response response = system.callProcess(command);
-		if (response.exitCode() != 0) {
-			log.error("Error downloading youtube {}", response);
-
-			return Optional.empty();
-		}
-
-		Path path = Path.of(response.stdout());
-		if (Files.exists(path)) {
-			return Optional.of(path);
-		} else {
-			log.error("download error stdout: {}, stderr: {}", response.stdout(), response.stderr());
-			throw new RuntimeException();
 		}
 	}
 
