@@ -21,10 +21,6 @@ public class TikTokHandler {
 	private final TikTokService tiktok;
 	private final TelegramClient telegramClient;
 
-	public void handle(URI uri, Update update) {
-		handle(uri, update, "");
-	}
-
 	public void handle(URI uri, Update update, String text) {
 		VideoData data = tiktok.getData(uri);
 		if (tiktok.isVideo(data)) {

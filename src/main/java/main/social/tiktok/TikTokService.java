@@ -29,19 +29,13 @@ public class TikTokService {
 	}
 
 	public List<String> getImagesUrls(VideoData data) {
-		if (!isVideo(data)) {
-			return data.getImagesUrls();
-		}
+		return !isVideo(data) ? data.getImagesUrls() : List.of();
 
-		return List.of();
 	}
 
 	public List<String> getVideoMediaUrls(VideoData data) {
-		if (isVideo(data)) {
-			return data.getVideoUrls();
-		}
+		return isVideo(data) ? data.getVideoUrls() : List.of();
 
-		return List.of();
 	}
 
 	public InputStream download(String videoUrl) {

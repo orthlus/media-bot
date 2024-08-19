@@ -20,10 +20,6 @@ public class InstagramHandler {
 	private final InstagramService instagram;
 	private final TelegramClient telegramClient;
 
-	public void handle(URI uri, Update update) {
-		handle(uri, update, "");
-	}
-
 	public void handle(URI uri, Update update, String text) {
 		try {
 			InputStream inputStream = instagram.download(uri);
