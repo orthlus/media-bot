@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
@@ -64,14 +65,14 @@ public class YouTubeService {
 
 	private boolean isFileOlder5Hours(Path path) {
 		LocalDateTime fileCreateTime = getFileCreateTime(path);
-		return LocalDateTime.now(Main.zone).minusHours(5).isAfter(fileCreateTime);
+		return LocalDateTime.now().minusHours(5).isAfter(fileCreateTime);
 	}
 
 	private LocalDateTime getFileCreateTime(Path path) {
 		try {
 			BasicFileAttributes basicFileAttributes = Files.readAttributes(path, BasicFileAttributes.class);
 			FileTime fileTime = basicFileAttributes.creationTime();
-			return LocalDateTime.ofInstant(fileTime.toInstant(), Main.zone);
+			return LocalDateTime.ofInstant(fileTime.toInstant(), Clock.systemDefaultZone().getZone());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
