@@ -2,6 +2,9 @@ package main.social.ig;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import main.social.ig.models.MediaUrl;
+import main.social.ig.models.PhotoUrl;
+import main.social.ig.models.VideoUrl;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -17,14 +20,13 @@ public class InstagramService {
 	@Qualifier("ig")
 	private final RestTemplate client;
 
-	public InputStream download(URI uri) {
-		String mediaUrl = getMediaUrl(uri);
-		byte[] bytes = client.getForObject(URI.create(mediaUrl), byte[].class);
+	public InputStream download(MediaUrl url) {
+		byte[] bytes = client.getForObject(URI.create(url.getUrl()), byte[].class);
 
 		return new ByteArrayInputStream(bytes);
 	}
 
-	public String getMediaUrl(URI uri) {
+	public MediaUrl getMediaUrl(URI uri) {
 		IGMedia igMedia = client.getForObject("/media/by/url?url=" + uri.toString(), IGMedia.class);
 		try {
 			return parseSingleMediaUrl(igMedia);
@@ -35,10 +37,10 @@ public class InstagramService {
 		}
 	}
 
-	private String parseSingleMediaUrl(IGMedia media) {
+	private MediaUrl parseSingleMediaUrl(IGMedia media) {
 		return switch (media.getMediaType()) {
-			case 1 -> media.getSinglePhotoUrl();
-			case 2 -> media.getSingleVideoUrl();
+			case 1 -> new PhotoUrl(media.getSinglePhotoUrl());
+			case 2 -> new VideoUrl(media.getSingleVideoUrl());
 			default -> throw new IllegalStateException("Unexpected value: " + media.getMediaType());
 		};
 	}

@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import main.exceptions.NotSendException;
 import main.social.ig.InstagramService;
+import main.social.ig.models.MediaUrl;
+import main.social.ig.models.PhotoUrl;
+import main.social.ig.models.VideoUrl;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -22,13 +25,14 @@ public class InstagramHandler {
 
 	public void handle(URI uri, Update update, String text) {
 		try {
-			InputStream inputStream = instagram.download(uri);
-			sendVideoByUpdate(update, text, inputStream);
+			MediaUrl url = instagram.getMediaUrl(uri);
+			InputStream inputStream = instagram.download(url);
+			sendMediaByUpdate(update, text, url, inputStream);
 		} catch (Exception e) {
 			log.error("error send instagram file, trying send url - {}", uri, e);
 			try {
-				String url = instagram.getMediaUrl(uri);
-				sendVideoByUpdate(update, text, url);
+				MediaUrl url = instagram.getMediaUrl(uri);
+				sendMediaByUpdate(update, text, url);
 			} catch (RuntimeException ex) {
 				log.error("error send instagram - {}", uri, e);
 				throw new NotSendException();
@@ -36,11 +40,15 @@ public class InstagramHandler {
 		}
 	}
 
-	public void sendVideoByUpdate(Update update, String message, InputStream dataStream) {
-		BotUtils.sendVideoByUpdate(update, message, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
-	}
+	public void sendMediaByUpdate(Update update, String message, MediaUrl url, InputStream... dataStream) {
+		InputFile file = dataStream.length > 0 ?
+				new InputFile(dataStream[0], UUID.randomUUID().toString()) :
+				new InputFile(url.getUrl());
 
-	public void sendVideoByUpdate(Update update, String message, String videoUrl) {
-		BotUtils.sendVideoByUpdate(update, message, new InputFile(videoUrl), telegramClient);
+		if (url instanceof VideoUrl) {
+			BotUtils.sendVideoByUpdate(update, message, file, telegramClient);
+		} else if (url instanceof PhotoUrl) {
+			BotUtils.sendImageByUpdate(update, message, file, telegramClient);
+		}
 	}
 }

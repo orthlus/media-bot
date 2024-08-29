@@ -55,6 +55,15 @@ public class BotUtils {
 				telegramClient);
 	}
 
+	public static void sendImageByUpdate(Update update, String message, InputFile inputFile, TelegramClient telegramClient) {
+		execute(SendPhoto.builder()
+						.chatId(update.getMessage().getChatId())
+						.caption(message)
+						.parseMode("markdown")
+						.photo(inputFile),
+				telegramClient);
+	}
+
 	public static void sendImagesByUpdate(Update update, List<String> imagesUrls, String text, TelegramClient telegramClient) {
 		if (imagesUrls.isEmpty()) {
 			return;
