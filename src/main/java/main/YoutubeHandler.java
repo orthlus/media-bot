@@ -70,6 +70,7 @@ public class YoutubeHandler {
 			execute(SendMessage.builder()
 							.chatId(update.getMessage().getChatId())
 							.text("Почему то не удалось скачать [файл](%s)".formatted(uri))
+							.parseMode("markdown")
 							.disableWebPagePreview(true),
 					telegramClient);
 		} catch (TooLargeFileException e) {
