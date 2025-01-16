@@ -1,4 +1,4 @@
-package main.social.ig;
+package main.social.ig.models.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
