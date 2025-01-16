@@ -27,7 +27,7 @@ public class InstagramService {
 	}
 
 	public MediaUrl getMediaUrl(URI uri) {
-		IGMedia igMedia = client.getForObject("/media/by/url?url=" + uri.toString(), IGMedia.class);
+		IGMedia igMedia = client.getForObject("/v1/media/by/url?url=" + uri.toString(), IGMedia.class);
 		try {
 			return parseSingleMediaUrl(igMedia);
 		} catch (Exception e) {
