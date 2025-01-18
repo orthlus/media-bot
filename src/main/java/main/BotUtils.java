@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
@@ -61,6 +62,40 @@ public class BotUtils {
 						.caption(message)
 						.parseMode("markdown")
 						.photo(inputFile),
+				telegramClient);
+	}
+
+	public static void sendMediasByUpdate(Update update, List<InputMedia> inputMedias, String text, TelegramClient telegramClient) {
+		if (inputMedias.isEmpty()) {
+			return;
+		}
+
+		if (update.getMessage().isGroupMessage() || update.getMessage().isSuperGroupMessage()) {
+			if (inputMedias.size() > 10) {
+				sendMedias(update, inputMedias.subList(0, 10), text, telegramClient);
+				sleep(500);
+				String s = "Больше 10 фото в группу не имею присылать((\nА прислано было %d фото".formatted(inputMedias.size());
+				execute(SendMessage.builder()
+								.text(s)
+								.chatId(update.getMessage().getChatId()),
+						telegramClient);
+			} else {
+				sendMedias(update, inputMedias, text, telegramClient);
+			}
+		} else {
+			List<List<InputMedia>> partitions = Lists.partition(inputMedias, 10);
+			for (List<InputMedia> medias : partitions) {
+				sendMedias(update, medias, text, telegramClient);
+			}
+		}
+	}
+
+	private static void sendMedias(Update update, List<InputMedia> photos, String text, TelegramClient telegramClient) {
+		photos.get(0).setCaption(text);
+		photos.get(0).setParseMode("markdown");
+		execute(SendMediaGroup.builder()
+						.chatId(update.getMessage().getChatId())
+						.medias(photos),
 				telegramClient);
 	}
 

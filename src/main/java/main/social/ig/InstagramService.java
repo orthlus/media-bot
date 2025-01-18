@@ -2,17 +2,22 @@ package main.social.ig;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import main.exceptions.RequestIgUrlException;
 import main.social.ig.models.MediaUrl;
 import main.social.ig.models.PhotoUrl;
 import main.social.ig.models.VideoUrl;
 import main.social.ig.models.api.IGMedia;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 @Slf4j
 @Component
@@ -27,15 +32,36 @@ public class InstagramService {
 		return new ByteArrayInputStream(bytes);
 	}
 
-	public MediaUrl getMediaUrl(URI uri) {
-		IGMedia igMedia = client.getForObject("/v1/media/by/url?url=" + uri.toString(), IGMedia.class);
-		try {
-			return parseSingleMediaUrl(igMedia);
-		} catch (Exception e) {
-			log.error("ig media url error", e);
-
-			throw new RuntimeException("ig media url error " + uri);
+	public List<MediaUrl> getMediaUrls(URI uri) {
+		if (uri.toString().contains("/stories/")) {
+			if (uri.toString().contains("/s/")) {
+				try {
+					return requestMediaUrl("/v1/share/by/url?url=" + uri);
+				} catch (RequestIgUrlException e) {
+					return requestMediaUrl("/v1/story/by/url?url=" + uri);
+				}
+			} else {
+				return requestMediaUrl("/v1/story/by/url?url=" + uri);
+			}
+		} else {
+			return requestMediaUrl("/v1/media/by/url?url=" + uri);
 		}
+	}
+
+	private List<MediaUrl> requestMediaUrl(String path) {
+		try {
+			IGMedia igMedia = client.getForObject(path, IGMedia.class);
+			return parseListMediaUrl(requireNonNull(igMedia));
+		} catch (IllegalStateException | RestClientException e) {
+			throw new RequestIgUrlException("ig error: " + path, e);
+		}
+	}
+
+	private List<MediaUrl> parseListMediaUrl(IGMedia media) {
+		if (media.getMediaType() == 8) {
+			return media.getResources().stream().map(this::parseSingleMediaUrl).toList();
+		}
+		return List.of(parseSingleMediaUrl(media));
 	}
 
 	private MediaUrl parseSingleMediaUrl(IGMedia media) {
