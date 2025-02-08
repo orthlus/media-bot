@@ -54,7 +54,7 @@
         <dependency>
             <groupId>art.aelaort</groupId>
             <artifactId>aelaort-telegrambots</artifactId>
-            <version>11.1</version>
+            <version>11.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
