@@ -1,9 +1,9 @@
-package main;
+package main.social.ig;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import main.BotUtils;
 import main.exceptions.NotSendException;
-import main.social.ig.InstagramService;
 import main.social.ig.models.MediaUrl;
 import main.social.ig.models.PhotoUrl;
 import main.social.ig.models.VideoUrl;

@@ -1,9 +1,8 @@
-package main;
+package main.social.tiktok;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import main.social.tiktok.TikTokService;
-import main.social.tiktok.VideoData;
+import main.BotUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;

@@ -1,12 +1,12 @@
-package main;
+package main.social.yt;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import main.BotUtils;
 import main.exceptions.NotSendException;
 import main.exceptions.TooLargeFileException;
 import main.exceptions.YoutubeFileDownloadException;
-import main.social.yt.YouTubeService;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
