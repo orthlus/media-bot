@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import main.exceptions.InvalidUrlException;
 import main.exceptions.UnknownHostException;
-import main.social.ig.KnownHosts;
+import main.social.KnownHosts;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;

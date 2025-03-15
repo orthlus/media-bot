@@ -1,4 +1,4 @@
-package main.social.ig;
+package main.social;
 
 import lombok.Getter;
 

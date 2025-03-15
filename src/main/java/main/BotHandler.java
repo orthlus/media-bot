@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Arrays.asList;
 import static main.BotUtils.*;
-import static main.social.ig.KnownHosts.YOUTUBE;
+import static main.social.KnownHosts.YOUTUBE;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
