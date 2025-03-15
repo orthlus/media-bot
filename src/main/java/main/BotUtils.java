@@ -45,7 +45,16 @@ public class BotUtils {
 				telegramClient);
 	}
 
-	public static void deleteMessage(Update update, TelegramClient telegramClient) {
+	public void sendMarkdown(Update update, String text) {
+		execute(SendMessage.builder()
+						.chatId(update.getMessage().getChatId())
+						.text(text)
+						.parseMode("markdown")
+						.disableWebPagePreview(true),
+				telegramClient);
+	}
+
+	public void deleteMessage(Update update) {
 		long chatId = update.getMessage().getChatId();
 		int messageId = update.getMessage().getMessageId();
 		try {
@@ -56,11 +65,11 @@ public class BotUtils {
 		}
 	}
 
-	public static void sendVideoByUpdate(Update update, String message, InputStream dataStream, TelegramClient telegramClient) {
+	public void sendVideoByUpdate(Update update, String message, InputStream dataStream) {
 		sendVideoByUpdate(update, message, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 
-	public static void sendVideoByUpdate(Update update, String message, Path path, TelegramClient telegramClient) {
+	public void sendVideoByUpdate(Update update, String message, Path path) {
 		sendVideoByUpdate(update, message, new InputFile(path.toFile(), UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 

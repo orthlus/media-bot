@@ -32,6 +32,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 @Component
 @RequiredArgsConstructor
 public class BotHandler implements SpringLongPollingBot {
+	private final BotUtils bot;
 	@Getter
 	@Value("${bot.token}")
 	private String botToken;
@@ -111,7 +112,7 @@ public class BotHandler implements SpringLongPollingBot {
 			logMessageIfHasUrl(update);
 			String text = buildTextMessage(uri, update);
 			handleByHost(uri, update, text, true);
-			deleteMessage(update, telegramClient);
+			bot.deleteMessage(update);
 		} catch (InvalidUrlException | UnknownHostException ignored) {
 		} catch (NotSendException e) {
 			log.error("error sending message by {}", inputText);
