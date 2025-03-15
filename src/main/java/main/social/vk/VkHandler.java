@@ -11,6 +11,7 @@ import main.social.YtdlpService;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpServerErrorException;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.net.URI;
@@ -38,6 +39,9 @@ public class VkHandler {
 			bot.sendMarkdown(update, "Это ([это](%s)) не поддерживается для скачивания :(".formatted(uri));
 		} catch (YtdlpFileDownloadException e) {
 			log.error("vk download error - YoutubeFileDownloadException");
+			bot.sendMarkdown(update, "Почему то не удалось скачать [файл](%s)".formatted(uri));
+		} catch (HttpServerErrorException e) {
+			log.error("vk download error - HttpServerErrorException (5xx)");
 			bot.sendMarkdown(update, "Почему то не удалось скачать [файл](%s)".formatted(uri));
 		} catch (TooLargeFileException e) {
 			bot.sendMarkdown(update, "[Файл](%s) больше 2 ГБ, невозможно отправить".formatted(uri));
