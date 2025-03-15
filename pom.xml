@@ -74,7 +74,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>main.Main</mainClass>
+                            <mainClass>art.aelaort.Main</mainClass>
                             <classpathPrefix>dependency/</classpathPrefix>
                         </manifest>
                     </archive>
@@ -98,7 +98,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>main.Main</mainClass>
+                    <mainClass>art.aelaort.Main</mainClass>
                 </configuration>
             </plugin>
 
