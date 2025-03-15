@@ -10,6 +10,7 @@ import main.exceptions.NotSendException;
 import main.exceptions.UnknownHostException;
 import main.social.ig.InstagramHandler;
 import main.social.tiktok.TikTokHandler;
+import main.social.vk.VkHandler;
 import main.social.yt.YoutubeHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 @RequiredArgsConstructor
 public class BotHandler implements SpringLongPollingBot {
 	private final BotUtils bot;
+	private final VkHandler vkHandler;
 	@Getter
 	@Value("${bot.token}")
 	private String botToken;
@@ -141,6 +143,7 @@ public class BotHandler implements SpringLongPollingBot {
 			case INSTAGRAM -> instagramHandler.handle(uri, update, text);
 			case TIKTOK -> tikTokHandler.handle(uri, update, text);
 			case YOUTUBE -> youtubeHandler.handle(uri, update, text, isDeleteSourceMessage);
+			case VK -> vkHandler.handle(uri, update, text, isDeleteSourceMessage);
 		}
 	}
 

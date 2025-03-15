@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum KnownHosts {
 	INSTAGRAM("instagram", "instagram.com"),
 	TIKTOK("tiktok", "tiktok.com", "vt.tiktok.com", "vm.tiktok.com"),
+	VK("vk", "vk.com"),
 	YOUTUBE("youtube", "youtube.com", "youtu.be");
 	final String[] hosts;
 	final String text;
