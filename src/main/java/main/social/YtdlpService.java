@@ -1,4 +1,4 @@
-package main.social.yt;
+package main.social;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +13,7 @@ import java.nio.file.Path;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class YouTubeService {
+public class YtdlpService {
 	@Qualifier("ytdlp")
 	private final RestTemplate restTemplate;
 

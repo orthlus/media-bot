@@ -7,6 +7,7 @@ import main.BotUtils;
 import main.exceptions.NotSendException;
 import main.exceptions.TooLargeFileException;
 import main.exceptions.YoutubeFileDownloadException;
+import main.social.YtdlpService;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -28,7 +29,7 @@ import static art.aelaort.TelegramClientHelpers.execute;
 @Component
 @RequiredArgsConstructor
 public class YoutubeHandler {
-	private final YouTubeService youTube;
+	private final YtdlpService youTube;
 	private final TelegramClient telegramClient;
 
 	private void checkVideoDuration(URI uri, Update update, TelegramClient telegramClient, boolean isDeleteSourceMessage) {
