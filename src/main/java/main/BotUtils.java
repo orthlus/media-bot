@@ -1,10 +1,12 @@
 package main;
 
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import main.exceptions.InvalidUrlException;
 import main.exceptions.UnknownHostException;
 import main.social.KnownHosts;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -17,17 +19,24 @@ import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static art.aelaort.TelegramClientHelpers.execute;
 
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class BotUtils {
+	private final TelegramClient telegramClient;
+
 	public static void sendByUpdate(String text, Update update, TelegramClient telegramClient) {
 		Message message = update.getMessage();
 		execute(SendMessage.builder()
@@ -45,6 +54,14 @@ public class BotUtils {
 		} catch (Exception e) {
 			log.error("telegram - error delete message, chat {} messageId {}", chatId, messageId, e);
 		}
+	}
+
+	public static void sendVideoByUpdate(Update update, String message, InputStream dataStream, TelegramClient telegramClient) {
+		sendVideoByUpdate(update, message, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
+	}
+
+	public static void sendVideoByUpdate(Update update, String message, Path path, TelegramClient telegramClient) {
+		sendVideoByUpdate(update, message, new InputFile(path.toFile(), UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 
 	public static void sendVideoByUpdate(Update update, String message, InputFile inputFile, TelegramClient telegramClient) {

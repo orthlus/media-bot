@@ -12,16 +12,13 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.UUID;
 
 import static art.aelaort.TelegramClientHelpers.execute;
 
@@ -32,7 +29,7 @@ public class YoutubeHandler {
 	private final YtdlpService youTube;
 	private final TelegramClient telegramClient;
 
-	private void checkVideoDuration(URI uri, Update update, TelegramClient telegramClient, boolean isDeleteSourceMessage) {
+	private void checkVideoDuration(URI uri, Update update, boolean isDeleteSourceMessage) {
 		if (!uri.getPath().startsWith("/shorts")) {
 			int videoDurationSeconds = youTube.getVideoDurationSeconds(uri);
 			if (videoDurationSeconds > 120) {
@@ -60,12 +57,12 @@ public class YoutubeHandler {
 		}
 	}
 
-	public void handle(URI uri, Update update, String text, TelegramClient telegramClient, boolean isDeleteSourceMessage) {
+	public void handle(URI uri, Update update, String text, boolean isDeleteSourceMessage) {
 		try {
-			checkVideoDuration(uri, update, telegramClient, isDeleteSourceMessage);
+			checkVideoDuration(uri, update, isDeleteSourceMessage);
 			Path file = youTube.downloadFileByUrl(uri);
 			checkFileSize(file);
-			sendVideoByUpdate(update, text, file);
+			BotUtils.sendVideoByUpdate(update, text, file, telegramClient);
 		} catch (YoutubeFileDownloadException e) {
 			log.error("youtube download error - YoutubeFileDownloadException");
 			execute(SendMessage.builder()
@@ -90,13 +87,5 @@ public class YoutubeHandler {
 	@SneakyThrows
 	private boolean isFileTooLarge(Path file) {
 		return Files.size(file) > 2L * 1024 * 1024 * 1024;
-	}
-
-	public void sendVideoByUpdate(Update update, String message, Path path) {
-		BotUtils.sendVideoByUpdate(update, message, new InputFile(path.toFile(), UUID.randomUUID() + ".mp4"), telegramClient);
-	}
-
-	public void sendVideoByUpdate(Update update, String message, InputStream dataStream) {
-		BotUtils.sendVideoByUpdate(update, message, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 }
