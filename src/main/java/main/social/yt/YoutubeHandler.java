@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import main.BotUtils;
 import main.exceptions.NotSendException;
 import main.exceptions.TooLargeFileException;
-import main.exceptions.YoutubeFileDownloadException;
+import main.exceptions.YtdlpFileDownloadException;
 import main.social.YtdlpService;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.springframework.stereotype.Component;
@@ -29,7 +29,7 @@ public class YoutubeHandler {
 			Path file = ytdlp.downloadFileByUrl(uri);
 			checkFileSize(file);
 			bot.sendVideoByUpdate(update, text, file);
-		} catch (YoutubeFileDownloadException e) {
+		} catch (YtdlpFileDownloadException e) {
 			log.error("youtube download error - YoutubeFileDownloadException");
 			bot.sendMarkdown(update, "Почему то не удалось скачать [файл](%s)".formatted(uri));
 		} catch (TooLargeFileException e) {

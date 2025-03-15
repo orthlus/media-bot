@@ -2,7 +2,7 @@ package main.social;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import main.exceptions.YoutubeFileDownloadException;
+import main.exceptions.YtdlpFileDownloadException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -34,7 +34,7 @@ public class YtdlpService {
 		String formatted = "/download?uri=%s&proxy_url=%s".formatted(uri, proxyUrl);
 		String filepath = restTemplate.getForObject(formatted, String.class);
 		if (filepath == null) {
-			throw new YoutubeFileDownloadException();
+			throw new YtdlpFileDownloadException();
 		} else {
 			return Path.of(filepath.trim());
 		}
@@ -43,7 +43,7 @@ public class YtdlpService {
 	public Path downloadFileByUrl(URI uri) {
 		String filepath = restTemplate.getForObject("/download?uri=" + uri, String.class);
 		if (filepath == null) {
-			throw new YoutubeFileDownloadException();
+			throw new YtdlpFileDownloadException();
 		} else {
 			return Path.of(filepath.trim());
 		}

@@ -6,7 +6,7 @@ import main.BotUtils;
 import main.exceptions.NotSendException;
 import main.exceptions.NotSupportedVkMediaException;
 import main.exceptions.TooLargeFileException;
-import main.exceptions.YoutubeFileDownloadException;
+import main.exceptions.YtdlpFileDownloadException;
 import main.social.YtdlpService;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +36,7 @@ public class VkHandler {
 			bot.sendVideoByUpdate(update, text, file);
 		} catch (NotSupportedVkMediaException e) {
 			bot.sendMarkdown(update, "Это ([это](%s)) не поддерживается для скачивания :(".formatted(uri));
-		} catch (YoutubeFileDownloadException e) {
+		} catch (YtdlpFileDownloadException e) {
 			log.error("vk download error - YoutubeFileDownloadException");
 			bot.sendMarkdown(update, "Почему то не удалось скачать [файл](%s)".formatted(uri));
 		} catch (TooLargeFileException e) {
