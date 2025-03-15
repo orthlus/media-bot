@@ -23,19 +23,6 @@ public class YoutubeHandler {
 	private final YtdlpService ytdlp;
 	private final BotUtils bot;
 
-	private void checkVideoDuration(URI uri, Update update, boolean isDeleteSourceMessage) {
-		if (!uri.getPath().startsWith("/shorts")) {
-			int videoDurationSeconds = ytdlp.getVideoDurationSeconds(uri);
-			if (videoDurationSeconds > 120) {
-				String durationText = DurationFormatUtils.formatDurationWords(videoDurationSeconds * 1000L, true, true);
-				bot.sendMarkdown(update, "wow, [video](%s) duration is %s. loading...".formatted(uri, durationText));
-				if (isDeleteSourceMessage) {
-					bot.deleteMessage(update);
-				}
-			}
-		}
-	}
-
 	public void handle(URI uri, Update update, String text, boolean isDeleteSourceMessage) {
 		try {
 			checkVideoDuration(uri, update, isDeleteSourceMessage);
@@ -50,6 +37,19 @@ public class YoutubeHandler {
 		} catch (Exception e) {
 			log.error("error send youtube url - {}", uri, e);
 			throw new NotSendException();
+		}
+	}
+
+	private void checkVideoDuration(URI uri, Update update, boolean isDeleteSourceMessage) {
+		if (!uri.getPath().startsWith("/shorts")) {
+			int videoDurationSeconds = ytdlp.getVideoDurationSeconds(uri);
+			if (videoDurationSeconds > 120) {
+				String durationText = DurationFormatUtils.formatDurationWords(videoDurationSeconds * 1000L, true, true);
+				bot.sendMarkdown(update, "wow, [video](%s) duration is %s. loading...".formatted(uri, durationText));
+				if (isDeleteSourceMessage) {
+					bot.deleteMessage(update);
+				}
+			}
 		}
 	}
 }
