@@ -35,7 +35,7 @@ public class YoutubeHandler {
 			bot.sendMarkdown(update, "Почему то не удалось скачать [файл](%s)".formatted(uri));
 		} catch (HttpServerErrorException e) {
 			log.error("youtube download error - HttpServerErrorException (5xx)");
-			bot.sendMarkdown(update, "Почему то не удалось скачать [файл](%s)".formatted(uri));
+			bot.sendMarkdown(update, "Почему то (5xx) не удалось скачать [файл](%s)".formatted(uri));
 		} catch (TooLargeFileException e) {
 			bot.sendMarkdown(update, "[Файл](%s) больше 2 ГБ, невозможно отправить".formatted(uri));
 		} catch (Exception e) {
