@@ -16,8 +16,8 @@ public class Config {
 						   @Value("${instagram.api.url}") String igApiUrl) {
 		return restTemplateBuilder
 				.rootUri(igApiUrl)
-				.setConnectTimeout(Duration.ofMinutes(5))
-				.setReadTimeout(Duration.ofMinutes(5))
+				.connectTimeout(Duration.ofMinutes(5))
+				.readTimeout(Duration.ofMinutes(5))
 				.defaultHeader("x-access-key", igApiToken)
 				.build();
 	}
@@ -28,8 +28,8 @@ public class Config {
 							   @Value("${tiktok.api.token}") String tiktokApiToken) {
 		return restTemplateBuilder
 				.rootUri(tiktokApiUrl)
-				.setConnectTimeout(Duration.ofMinutes(5))
-				.setReadTimeout(Duration.ofMinutes(5))
+				.connectTimeout(Duration.ofMinutes(5))
+				.readTimeout(Duration.ofMinutes(5))
 				.defaultHeader("authorization", "Bearer " + tiktokApiToken)
 				.build();
 	}
@@ -39,8 +39,8 @@ public class Config {
 							  @Value("${ytdlp.url}") String url) {
 		return restTemplateBuilder
 				.rootUri(url)
-				.setConnectTimeout(Duration.ofMinutes(5))
-				.setReadTimeout(Duration.ofMinutes(5))
+				.connectTimeout(Duration.ofMinutes(5))
+				.readTimeout(Duration.ofMinutes(5))
 				.build();
 	}
 }
