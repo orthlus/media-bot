@@ -12,9 +12,11 @@ import java.time.Duration;
 public class Config {
 	@Bean
 	public RestTemplate ig(RestTemplateBuilder restTemplateBuilder,
+						   ProxyCustomizer proxyCustomizer,
 						   @Value("${instagram.api.token}") String igApiToken,
 						   @Value("${instagram.api.url}") String igApiUrl) {
 		return restTemplateBuilder
+				.customizers(proxyCustomizer)
 				.rootUri(igApiUrl)
 				.connectTimeout(Duration.ofMinutes(5))
 				.readTimeout(Duration.ofMinutes(5))
@@ -24,9 +26,11 @@ public class Config {
 
 	@Bean
 	public RestTemplate tiktok(RestTemplateBuilder restTemplateBuilder,
+							   ProxyCustomizer proxyCustomizer,
 							   @Value("${tiktok.api.url}") String tiktokApiUrl,
 							   @Value("${tiktok.api.token}") String tiktokApiToken) {
 		return restTemplateBuilder
+				.customizers(proxyCustomizer)
 				.rootUri(tiktokApiUrl)
 				.connectTimeout(Duration.ofMinutes(5))
 				.readTimeout(Duration.ofMinutes(5))
