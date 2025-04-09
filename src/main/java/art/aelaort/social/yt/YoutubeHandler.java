@@ -8,6 +8,7 @@ import art.aelaort.exceptions.TooLargeFileException;
 import art.aelaort.exceptions.YtdlpFileDownloadException;
 import art.aelaort.social.YtdlpService;
 import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpServerErrorException;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -23,11 +24,13 @@ import static art.aelaort.TelegramUtils.checkFileSize;
 public class YoutubeHandler {
 	private final YtdlpService ytdlp;
 	private final BotUtils bot;
+	@Value("${proxy-url}")
+	private String proxyUrl;
 
 	public void handle(URI uri, Update update, String text, boolean isDeleteSourceMessage) {
 		try {
 			checkVideoDuration(uri, update, isDeleteSourceMessage);
-			Path file = ytdlp.downloadFileByUrl(uri);
+			Path file = ytdlp.downloadFileByUrl(uri, proxyUrl);
 			checkFileSize(file);
 			bot.sendVideoByUpdate(update, text, file);
 		} catch (YtdlpFileDownloadException e) {
@@ -46,7 +49,7 @@ public class YoutubeHandler {
 
 	private void checkVideoDuration(URI uri, Update update, boolean isDeleteSourceMessage) {
 		if (!uri.getPath().startsWith("/shorts")) {
-			int videoDurationSeconds = ytdlp.getVideoDurationSeconds(uri);
+			int videoDurationSeconds = ytdlp.getVideoDurationSeconds(uri, proxyUrl);
 			if (videoDurationSeconds > 120) {
 				String durationText = DurationFormatUtils.formatDurationWords(videoDurationSeconds * 1000L, true, true);
 				bot.sendMarkdown(update, "wow, [video](%s) duration is %s. loading...".formatted(uri, durationText));

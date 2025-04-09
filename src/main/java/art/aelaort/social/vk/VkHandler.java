@@ -1,15 +1,14 @@
 package art.aelaort.social.vk;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import art.aelaort.BotUtils;
 import art.aelaort.exceptions.NotSendException;
 import art.aelaort.exceptions.NotSupportedVkMediaException;
 import art.aelaort.exceptions.TooLargeFileException;
 import art.aelaort.exceptions.YtdlpFileDownloadException;
 import art.aelaort.social.YtdlpService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpServerErrorException;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -25,14 +24,12 @@ import static art.aelaort.TelegramUtils.checkFileSize;
 public class VkHandler {
 	private final YtdlpService ytdlp;
 	private final BotUtils bot;
-	@Value("${vk.proxy-url}")
-	private String proxyUrl;
 
 	public void handle(URI uri, Update update, String text, boolean isDeleteSourceMessage) {
 		try {
 			checkUri(uri);
 			checkVideoDuration(uri, update, isDeleteSourceMessage);
-			Path file = ytdlp.downloadFileByUrl(uri, proxyUrl);
+			Path file = ytdlp.downloadFileByUrl(uri);
 			checkFileSize(file);
 			bot.sendVideoByUpdate(update, text, file);
 		} catch (NotSupportedVkMediaException e) {
@@ -59,7 +56,7 @@ public class VkHandler {
 	}
 
 	private void checkVideoDuration(URI uri, Update update, boolean isDeleteSourceMessage) {
-		int videoDurationSeconds = ytdlp.getVideoDurationSeconds(uri, proxyUrl);
+		int videoDurationSeconds = ytdlp.getVideoDurationSeconds(uri);
 		if (videoDurationSeconds > 120) {
 			String durationText = DurationFormatUtils.formatDurationWords(videoDurationSeconds * 1000L, true, true);
 			bot.sendMarkdown(update, "wow, [video](%s) duration is %s. loading...".formatted(uri, durationText));
