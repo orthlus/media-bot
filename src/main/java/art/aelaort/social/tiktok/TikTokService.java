@@ -3,6 +3,7 @@ package art.aelaort.social.tiktok;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,6 +20,7 @@ public class TikTokService {
 	@Qualifier("tiktok")
 	private final RestTemplate client;
 
+	@Retryable
 	public VideoData getData(URI videoUrl) {
 		String url = "/api/v1/tiktok/app/v3/fetch_one_video_by_share_url?share_url=" + videoUrl.toString();
 		return client.getForObject(url, VideoData.class);
@@ -38,6 +40,7 @@ public class TikTokService {
 
 	}
 
+	@Retryable
 	public InputStream download(String videoUrl) {
 		log.info("trying download {}", videoUrl);
 		byte[] bytes = client.getForObject(URI.create(videoUrl), byte[].class);

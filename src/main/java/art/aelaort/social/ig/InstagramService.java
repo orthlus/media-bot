@@ -8,6 +8,7 @@ import art.aelaort.social.ig.models.PhotoUrl;
 import art.aelaort.social.ig.models.VideoUrl;
 import art.aelaort.social.ig.models.api.IGMedia;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -26,6 +27,7 @@ public class InstagramService {
 	@Qualifier("ig")
 	private final RestTemplate client;
 
+	@Retryable
 	public InputStream download(MediaUrl url) {
 		log.info("trying download {}", url.getUrl());
 		byte[] bytes = client.getForObject(URI.create(url.getUrl()), byte[].class);
@@ -49,6 +51,7 @@ public class InstagramService {
 		}
 	}
 
+	@Retryable
 	private List<MediaUrl> requestMediaUrl(String path) {
 		try {
 			IGMedia igMedia = client.getForObject(path, IGMedia.class);
