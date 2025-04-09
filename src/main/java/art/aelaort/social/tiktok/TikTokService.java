@@ -39,6 +39,7 @@ public class TikTokService {
 	}
 
 	public InputStream download(String videoUrl) {
+		log.info("trying download {}", videoUrl);
 		byte[] bytes = client.getForObject(URI.create(videoUrl), byte[].class);
 		return new ByteArrayInputStream(bytes);
 	}
