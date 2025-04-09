@@ -32,7 +32,7 @@ public class Config {
 							   @Value("${tiktok.api.url}") String tiktokApiUrl,
 							   @Value("${tiktok.api.token}") String tiktokApiToken) {
 		return restTemplateBuilder
-				.customizers(proxyCustomizer)
+//				.customizers(proxyCustomizer)
 				.rootUri(tiktokApiUrl)
 				.connectTimeout(Duration.ofMinutes(5))
 				.readTimeout(Duration.ofMinutes(5))
