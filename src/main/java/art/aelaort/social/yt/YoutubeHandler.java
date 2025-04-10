@@ -48,8 +48,16 @@ public class YoutubeHandler {
 	}
 
 	private void checkVideoDuration(URI uri, Update update, boolean isDeleteSourceMessage) {
+		int videoDurationSeconds = ytdlp.getVideoDurationSeconds(uri, proxyUrl);
+		if (videoDurationSeconds > 30 * 60) {
+			String durationText = DurationFormatUtils.formatDurationWords(videoDurationSeconds * 1000L, true, true);
+			bot.sendMarkdown(update, "no no, [video](%s) duration is %s, too long".formatted(uri, durationText));
+			if (isDeleteSourceMessage) {
+				bot.deleteMessage(update);
+			}
+			return;
+		}
 		if (!uri.getPath().startsWith("/shorts")) {
-			int videoDurationSeconds = ytdlp.getVideoDurationSeconds(uri, proxyUrl);
 			if (videoDurationSeconds > 120) {
 				String durationText = DurationFormatUtils.formatDurationWords(videoDurationSeconds * 1000L, true, true);
 				bot.sendMarkdown(update, "wow, [video](%s) duration is %s. loading...".formatted(uri, durationText));
