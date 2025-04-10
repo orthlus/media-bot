@@ -19,6 +19,7 @@ import java.util.List;
 public class TikTokService {
 	@Qualifier("tiktok")
 	private final RestTemplate client;
+	private final RestTemplate rawProxy;
 
 	@Retryable
 	public VideoData getData(URI videoUrl) {
@@ -43,7 +44,7 @@ public class TikTokService {
 	@Retryable
 	public InputStream download(String videoUrl) {
 		log.info("trying download {}", videoUrl);
-		byte[] bytes = client.getForObject(URI.create(videoUrl), byte[].class);
+		byte[] bytes = rawProxy.getForObject(URI.create(videoUrl), byte[].class);
 		return new ByteArrayInputStream(bytes);
 	}
 }

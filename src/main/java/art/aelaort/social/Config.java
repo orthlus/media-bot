@@ -65,4 +65,21 @@ public class Config {
 				.readTimeout(Duration.ofMinutes(5))
 				.build();
 	}
+
+	@Bean
+	public RestTemplate raw(RestTemplateBuilder restTemplateBuilder) {
+		return restTemplateBuilder
+				.connectTimeout(Duration.ofMinutes(5))
+				.readTimeout(Duration.ofMinutes(5))
+				.build();
+	}
+
+	@Bean
+	public RestTemplate rawProxy(RestTemplateBuilder restTemplateBuilder) {
+		return restTemplateBuilder
+				.customizers(this::proxyCustomizer)
+				.connectTimeout(Duration.ofMinutes(5))
+				.readTimeout(Duration.ofMinutes(5))
+				.build();
+	}
 }
