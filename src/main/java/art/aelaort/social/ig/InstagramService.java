@@ -29,7 +29,6 @@ public class InstagramService {
 
 	@Retryable
 	public InputStream download(MediaUrl url) {
-		log.info("trying download {}", url.getUrl());
 		byte[] bytes = client.getForObject(URI.create(url.getUrl()), byte[].class);
 
 		return new ByteArrayInputStream(bytes);

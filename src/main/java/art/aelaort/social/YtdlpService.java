@@ -31,7 +31,6 @@ public class YtdlpService {
 	}
 
 	public Path downloadFileByUrl(URI uri, String proxyUrl) {
-		log.info("downloadFileByUrl proxy uri={}", uri);
 		String formatted = "/download?uri=%s&proxy_url=%s".formatted(uri, proxyUrl);
 		String filepath = restTemplate.getForObject(formatted, String.class);
 		if (filepath == null) {
@@ -42,7 +41,6 @@ public class YtdlpService {
 	}
 
 	public Path downloadFileByUrl(URI uri) {
-		log.info("downloadFileByUrl uri={}", uri);
 		String filepath = restTemplate.getForObject("/download?uri=" + uri, String.class);
 		if (filepath == null) {
 			throw new YtdlpFileDownloadException();
