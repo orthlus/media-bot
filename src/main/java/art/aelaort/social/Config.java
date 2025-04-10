@@ -37,8 +37,8 @@ public class Config {
 		return restTemplateBuilder
 				.customizers(this::proxyCustomizer)
 				.rootUri(igApiUrl)
-				.connectTimeout(Duration.ofMinutes(5))
-				.readTimeout(Duration.ofMinutes(5))
+				.connectTimeout(Duration.ofSeconds(20))
+				.readTimeout(Duration.ofSeconds(20))
 				.defaultHeader("x-access-key", igApiToken)
 				.build();
 	}
@@ -50,8 +50,8 @@ public class Config {
 		return restTemplateBuilder
 //				.customizers(this::proxyCustomizer)
 				.rootUri(tiktokApiUrl)
-				.connectTimeout(Duration.ofMinutes(5))
-				.readTimeout(Duration.ofMinutes(5))
+				.connectTimeout(Duration.ofSeconds(20))
+				.readTimeout(Duration.ofSeconds(20))
 				.defaultHeader("authorization", "Bearer " + tiktokApiToken)
 				.build();
 	}
