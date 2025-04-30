@@ -43,7 +43,6 @@ public class TikTokService {
 
 	@Retryable
 	public InputStream download(String videoUrl) {
-		log.info("trying download {}", videoUrl);
 		byte[] bytes = rawProxy.getForObject(URI.create(videoUrl), byte[].class);
 		return new ByteArrayInputStream(bytes);
 	}
