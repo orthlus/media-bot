@@ -1,7 +1,6 @@
 package art.aelaort.utils;
 
 import art.aelaort.exceptions.TooLargeFileException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -13,20 +12,14 @@ import java.nio.file.Path;
 public class TelegramUtils {
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
+	@SneakyThrows
 	public static Update deserializeUpdate(String updateString) {
-		try {
-			return objectMapper.readValue(updateString, Update.class);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
+		return objectMapper.readValue(updateString, Update.class);
 	}
 
+	@SneakyThrows
 	public static String serializeUpdate(Update update) {
-		try {
-			return objectMapper.writeValueAsString(update);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
+		return objectMapper.writeValueAsString(update);
 	}
 
 	public static void checkFileSize(Path file) throws IOException {
