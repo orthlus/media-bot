@@ -1,4 +1,4 @@
-package art.aelaort.social.ig.models.api;
+package art.aelaort.service.social.ig.models.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

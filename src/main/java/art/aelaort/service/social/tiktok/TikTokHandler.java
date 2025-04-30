@@ -1,8 +1,8 @@
-package art.aelaort.social.tiktok;
+package art.aelaort.service.social.tiktok;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import art.aelaort.BotUtils;
+import art.aelaort.utils.BotUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;

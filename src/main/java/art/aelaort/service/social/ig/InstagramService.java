@@ -1,12 +1,12 @@
-package art.aelaort.social.ig;
+package art.aelaort.service.social.ig;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import art.aelaort.exceptions.RequestIgUrlException;
-import art.aelaort.social.ig.models.MediaUrl;
-import art.aelaort.social.ig.models.PhotoUrl;
-import art.aelaort.social.ig.models.VideoUrl;
-import art.aelaort.social.ig.models.api.IGMedia;
+import art.aelaort.service.social.ig.models.MediaUrl;
+import art.aelaort.service.social.ig.models.PhotoUrl;
+import art.aelaort.service.social.ig.models.VideoUrl;
+import art.aelaort.service.social.ig.models.api.IGMedia;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;

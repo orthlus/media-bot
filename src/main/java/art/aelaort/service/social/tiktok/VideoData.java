@@ -1,4 +1,4 @@
-package art.aelaort.social.tiktok;
+package art.aelaort.service.social.tiktok;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

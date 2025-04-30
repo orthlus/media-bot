@@ -1,12 +1,12 @@
-package art.aelaort.social.ig;
+package art.aelaort.service.social.ig;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import art.aelaort.BotUtils;
+import art.aelaort.utils.BotUtils;
 import art.aelaort.exceptions.NotSendException;
-import art.aelaort.social.ig.models.MediaUrl;
-import art.aelaort.social.ig.models.PhotoUrl;
-import art.aelaort.social.ig.models.VideoUrl;
+import art.aelaort.service.social.ig.models.MediaUrl;
+import art.aelaort.service.social.ig.models.PhotoUrl;
+import art.aelaort.service.social.ig.models.VideoUrl;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;

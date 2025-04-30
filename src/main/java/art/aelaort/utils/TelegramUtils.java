@@ -1,4 +1,4 @@
-package art.aelaort;
+package art.aelaort.utils;
 
 import lombok.SneakyThrows;
 import art.aelaort.exceptions.TooLargeFileException;

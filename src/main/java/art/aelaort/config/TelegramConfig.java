@@ -1,5 +1,8 @@
-package art.aelaort;
+package art.aelaort.config;
 
+import art.aelaort.SpringLongPollingBot;
+import art.aelaort.TelegramClientBuilder;
+import art.aelaort.TelegramInit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

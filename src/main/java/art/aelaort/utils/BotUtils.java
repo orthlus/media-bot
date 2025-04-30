@@ -1,11 +1,11 @@
-package art.aelaort;
+package art.aelaort.utils;
 
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import art.aelaort.exceptions.InvalidUrlException;
 import art.aelaort.exceptions.UnknownHostException;
-import art.aelaort.social.KnownHosts;
+import art.aelaort.service.social.KnownHosts;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;

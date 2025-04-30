@@ -1,4 +1,4 @@
-package art.aelaort.social;
+package art.aelaort.service.social;
 
 import lombok.Getter;
 

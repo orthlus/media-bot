@@ -1,4 +1,4 @@
-package art.aelaort.social.ig.models;
+package art.aelaort.service.social.ig.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

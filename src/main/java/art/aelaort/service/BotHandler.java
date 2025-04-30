@@ -1,5 +1,7 @@
-package art.aelaort;
+package art.aelaort.service;
 
+import art.aelaort.utils.BotUtils;
+import art.aelaort.SpringLongPollingBot;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -7,10 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import art.aelaort.exceptions.InvalidUrlException;
 import art.aelaort.exceptions.NotSendException;
 import art.aelaort.exceptions.UnknownHostException;
-import art.aelaort.social.ig.InstagramHandler;
-import art.aelaort.social.tiktok.TikTokHandler;
-import art.aelaort.social.vk.VkHandler;
-import art.aelaort.social.yt.YoutubeHandler;
+import art.aelaort.service.social.ig.InstagramHandler;
+import art.aelaort.service.social.tiktok.TikTokHandler;
+import art.aelaort.service.social.vk.VkHandler;
+import art.aelaort.service.social.yt.YoutubeHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -23,8 +25,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Arrays.asList;
-import static art.aelaort.BotUtils.*;
-import static art.aelaort.social.KnownHosts.YOUTUBE;
+import static art.aelaort.utils.BotUtils.*;
+import static art.aelaort.service.social.KnownHosts.YOUTUBE;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 

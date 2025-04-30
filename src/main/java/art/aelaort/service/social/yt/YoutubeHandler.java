@@ -1,12 +1,12 @@
-package art.aelaort.social.yt;
+package art.aelaort.service.social.yt;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import art.aelaort.BotUtils;
+import art.aelaort.utils.BotUtils;
 import art.aelaort.exceptions.NotSendException;
 import art.aelaort.exceptions.TooLargeFileException;
 import art.aelaort.exceptions.YtdlpFileDownloadException;
-import art.aelaort.social.YtdlpService;
+import art.aelaort.service.social.YtdlpService;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import java.net.URI;
 import java.nio.file.Path;
 
-import static art.aelaort.TelegramUtils.checkFileSize;
+import static art.aelaort.utils.TelegramUtils.checkFileSize;
 
 @Slf4j
 @Component

@@ -1,4 +1,4 @@
-package art.aelaort.social;
+package art.aelaort.service.social;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

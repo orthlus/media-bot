@@ -1,4 +1,4 @@
-package art.aelaort.social.tiktok;
+package art.aelaort.service.social.tiktok;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
