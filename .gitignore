@@ -2,3 +2,4 @@ target
 .idea
 *.iml
 deploy.bat
+src/main/resources/job.yaml
