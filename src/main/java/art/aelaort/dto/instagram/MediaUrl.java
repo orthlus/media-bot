@@ -1,4 +1,4 @@
-package art.aelaort.service.social.ig.models;
+package art.aelaort.dto.instagram;
 
 public interface MediaUrl {
 	String getUrl();

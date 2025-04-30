@@ -1,10 +1,10 @@
-package art.aelaort.service.social.ig.models;
+package art.aelaort.dto.instagram;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class PhotoUrl implements MediaUrl {
+public class VideoUrl implements MediaUrl {
 	private String url;
 }

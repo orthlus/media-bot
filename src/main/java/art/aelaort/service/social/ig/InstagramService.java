@@ -3,10 +3,10 @@ package art.aelaort.service.social.ig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import art.aelaort.exceptions.RequestIgUrlException;
-import art.aelaort.service.social.ig.models.MediaUrl;
-import art.aelaort.service.social.ig.models.PhotoUrl;
-import art.aelaort.service.social.ig.models.VideoUrl;
-import art.aelaort.service.social.ig.models.api.IGMedia;
+import art.aelaort.dto.instagram.MediaUrl;
+import art.aelaort.dto.instagram.PhotoUrl;
+import art.aelaort.dto.instagram.VideoUrl;
+import art.aelaort.dto.instagram.api.IGMedia;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -20,6 +20,7 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
+@SuppressWarnings("DataFlowIssue")
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -30,7 +31,6 @@ public class InstagramService {
 	@Retryable
 	public InputStream download(MediaUrl url) {
 		byte[] bytes = client.getForObject(URI.create(url.getUrl()), byte[].class);
-
 		return new ByteArrayInputStream(bytes);
 	}
 
