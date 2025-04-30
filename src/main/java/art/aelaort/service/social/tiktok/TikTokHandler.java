@@ -1,5 +1,6 @@
 package art.aelaort.service.social.tiktok;
 
+import art.aelaort.dto.tiktok.VideoData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import art.aelaort.utils.BotUtils;

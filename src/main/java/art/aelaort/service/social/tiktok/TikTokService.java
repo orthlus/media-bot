@@ -1,5 +1,6 @@
 package art.aelaort.service.social.tiktok;
 
+import art.aelaort.dto.tiktok.VideoData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,12 +34,10 @@ public class TikTokService {
 
 	public List<String> getImagesUrls(VideoData data) {
 		return !isVideo(data) ? data.getImagesUrls() : List.of();
-
 	}
 
 	public List<String> getVideoMediaUrls(VideoData data) {
 		return isVideo(data) ? data.getVideoUrls() : List.of();
-
 	}
 
 	@Retryable
