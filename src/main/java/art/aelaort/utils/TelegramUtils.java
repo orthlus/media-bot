@@ -1,5 +1,6 @@
 package art.aelaort.utils;
 
+import art.aelaort.dto.processing.JobData;
 import art.aelaort.exceptions.TooLargeFileException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -11,6 +12,16 @@ import java.nio.file.Path;
 
 public class TelegramUtils {
 	private static final ObjectMapper objectMapper = new ObjectMapper();
+
+	@SneakyThrows
+	public static JobData deserializeJobData(String jobDataString) {
+		return objectMapper.readValue(jobDataString, JobData.class);
+	}
+
+	@SneakyThrows
+	public static String serializeJobData(JobData jobData) {
+		return objectMapper.writeValueAsString(jobData);
+	}
 
 	@SneakyThrows
 	public static Update deserializeUpdate(String updateString) {

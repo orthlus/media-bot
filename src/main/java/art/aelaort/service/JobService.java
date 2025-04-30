@@ -1,5 +1,7 @@
 package art.aelaort.service;
 
+import art.aelaort.dto.processing.JobData;
+import art.aelaort.utils.TelegramUtils;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
@@ -12,8 +14,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,16 +28,21 @@ import java.util.UUID;
 public class JobService {
 	private final ResourceLoader resourceLoader;
 
-	public void runJob() {
+	public void runJob(String type, URI uri, Update update, String text, boolean isDeleteSourceMessage) {
 		try (KubernetesClient client = new KubernetesClientBuilder().build()) {
 			Job job = parseJob("job.yaml");
 
+			JobData jobData = new JobData(type, uri, update, text, isDeleteSourceMessage);
+			String jobDataStr = TelegramUtils.serializeJobData(jobData);
+
 			List<EnvVar> env = job.getSpec().getTemplate().getSpec().getContainers().get(0).getEnv();
 			env.add(envVar("run_mode", "job"));
-			env.add(envVar("EXTRA_VAR", "Added from Java"));
+			env.add(envVar("job_data", jobDataStr));
 			job.getSpec().getTemplate().getMetadata().setName(UUID.randomUUID().toString());
 
-			client.batch().v1().jobs().inNamespace("default").resource(job).create();
+			client.batch().v1().jobs()
+//					.inNamespace("default")
+					.resource(job).create();
 			System.out.println("Job from YAML created successfully!");
 		}
 	}
