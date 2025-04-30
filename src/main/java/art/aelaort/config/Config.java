@@ -1,4 +1,4 @@
-package art.aelaort.service.social;
+package art.aelaort.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
