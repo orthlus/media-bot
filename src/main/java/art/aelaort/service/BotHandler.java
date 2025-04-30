@@ -1,11 +1,6 @@
 package art.aelaort.service;
 
-import art.aelaort.utils.BotUtils;
 import art.aelaort.SpringLongPollingBot;
-import jakarta.annotation.PostConstruct;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import art.aelaort.exceptions.InvalidUrlException;
 import art.aelaort.exceptions.NotSendException;
 import art.aelaort.exceptions.UnknownHostException;
@@ -13,7 +8,13 @@ import art.aelaort.service.social.ig.InstagramHandler;
 import art.aelaort.service.social.tiktok.TikTokHandler;
 import art.aelaort.service.social.vk.VkHandler;
 import art.aelaort.service.social.yt.YoutubeHandler;
+import art.aelaort.utils.BotUtils;
+import jakarta.annotation.PostConstruct;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
@@ -24,15 +25,16 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static java.util.Arrays.asList;
-import static art.aelaort.utils.BotUtils.*;
 import static art.aelaort.service.social.KnownHosts.YOUTUBE;
+import static art.aelaort.utils.BotUtils.*;
+import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "run.mode", havingValue = "bot")
 public class BotHandler implements SpringLongPollingBot {
 	private final BotUtils bot;
 	private final VkHandler vkHandler;

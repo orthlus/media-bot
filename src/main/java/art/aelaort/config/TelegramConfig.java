@@ -4,6 +4,7 @@ import art.aelaort.SpringLongPollingBot;
 import art.aelaort.TelegramClientBuilder;
 import art.aelaort.TelegramInit;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
@@ -29,6 +30,7 @@ public class TelegramConfig {
 	}
 
 	@Bean
+	@ConditionalOnProperty(name = "run.mode", havingValue = "bot")
 	public TelegramInit telegramInit(List<SpringLongPollingBot> bots) {
 		return createTelegramInit(bots);
 	}
