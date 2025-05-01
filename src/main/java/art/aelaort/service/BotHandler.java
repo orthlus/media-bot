@@ -4,10 +4,6 @@ import art.aelaort.SpringLongPollingBot;
 import art.aelaort.exceptions.InvalidUrlException;
 import art.aelaort.exceptions.NotSendException;
 import art.aelaort.exceptions.UnknownHostException;
-import art.aelaort.service.social.ig.InstagramHandler;
-import art.aelaort.service.social.tiktok.TikTokHandler;
-import art.aelaort.service.social.vk.VkHandler;
-import art.aelaort.service.social.yt.YoutubeHandler;
 import art.aelaort.utils.BotUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
@@ -37,14 +33,11 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 @ConditionalOnProperty(name = "run.mode", havingValue = "bot")
 public class BotHandler implements SpringLongPollingBot {
 	private final BotUtils bot;
-	private final VkHandler vkHandler;
+	private final SocialHandlerService socialHandlerService;
 	@Getter
 	@Value("${bot.token}")
 	private String botToken;
 
-	private final InstagramHandler instagramHandler;
-	private final YoutubeHandler youtubeHandler;
-	private final TikTokHandler tikTokHandler;
 	private final TelegramClient telegramClient;
 
 	@Value("${bot.private_chat.id}")
@@ -116,7 +109,7 @@ public class BotHandler implements SpringLongPollingBot {
 			URI uri = getURL(parseUrlWithSign(inputText));
 			logMessageIfHasUrl(update);
 			String text = buildTextMessage(uri, update);
-			handleByHost(uri, update, text, true);
+			socialHandlerService.handleByHost(uri, update, text, true);
 			bot.deleteMessage(update);
 		} catch (InvalidUrlException | UnknownHostException ignored) {
 		} catch (NotSendException e) {
@@ -133,20 +126,11 @@ public class BotHandler implements SpringLongPollingBot {
 		try {
 			URI uri = getURL(inputText);
 			logMessageIfHasUrl(update);
-			handleByHost(uri, update, "", false);
+			socialHandlerService.handleByHost(uri, update, "", false);
 		} catch (InvalidUrlException e) {
 			sendByUpdate("Какая-то неправильная у вас ссылка :(", update);
 		} catch (UnknownHostException e) {
 			sendByUpdate("Неизвестный хост", update);
-		}
-	}
-
-	private void handleByHost(URI uri, Update update, String text, boolean isDeleteSourceMessage) {
-		switch (parseHost(uri)) {
-			case INSTAGRAM -> instagramHandler.handle(uri, update, text);
-			case TIKTOK -> tikTokHandler.handle(uri, update, text);
-			case YOUTUBE -> youtubeHandler.handle(uri, update, text, isDeleteSourceMessage);
-			case VK -> vkHandler.handle(uri, update, text, isDeleteSourceMessage);
 		}
 	}
 
