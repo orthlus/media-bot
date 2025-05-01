@@ -7,4 +7,4 @@ ENV spring_profiles_active=production
 COPY target/dependency dependency/
 ADD target/app.jar .
 
-ENTRYPOINT ["java", "-XX:+UseSerialGC", "-Xms64m", "-Xmx500m", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:+UseSerialGC", "-Xms64m", "-Xmx250m", "-jar", "app.jar"]
