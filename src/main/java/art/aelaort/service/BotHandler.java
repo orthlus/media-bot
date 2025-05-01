@@ -120,7 +120,7 @@ public class BotHandler implements SpringLongPollingBot {
 			URI uri = getURL(parseUrlWithSign(inputText));
 			logMessageWithUrl(update);
 			String text = buildTextMessage(uri, update);
-			socialHandlerService.handleByHost(uri, update, text, true);
+			socialHandlerService.runHandlerByHost(uri, update, text, true);
 			bot.deleteMessage(update);
 		} catch (InvalidUrlException | UnknownHostException ignored) {
 		} catch (NotSendException e) {
@@ -137,7 +137,7 @@ public class BotHandler implements SpringLongPollingBot {
 		try {
 			URI uri = getURL(inputText);
 			logMessageWithUrl(update);
-			socialHandlerService.handleByHost(uri, update, "", false);
+			socialHandlerService.runHandlerByHost(uri, update, "", false);
 		} catch (InvalidUrlException e) {
 			sendByUpdate("Какая-то неправильная у вас ссылка :(", update);
 		} catch (UnknownHostException e) {
