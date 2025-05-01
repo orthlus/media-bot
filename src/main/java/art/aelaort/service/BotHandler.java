@@ -93,15 +93,19 @@ public class BotHandler implements SpringLongPollingBot {
 
 		try {
 			URI uri = getURL(parseUrlWithSign(inputText));
-			if (shouldProcessYoutube(inputText, uri)) {
+			if (isItHost(uri, YOUTUBE)) {
+				if (shouldProcessYoutube(inputText)) {
+					groupChat(update);
+				}
+			} else {
 				groupChat(update);
 			}
 		} catch (InvalidUrlException | UnknownHostException ignored) {
 		}
 	}
 
-	private boolean shouldProcessYoutube(String inputText, URI uri) {
-		return isItHost(uri, YOUTUBE) && (isSubstitutionEnabled.get() || inputText.startsWith("!"));
+	private boolean shouldProcessYoutube(String inputText) {
+		return isSubstitutionEnabled.get() || inputText.startsWith("!");
 	}
 
 	private void handleSubstitutionCommands(String inputText, Update update) {
