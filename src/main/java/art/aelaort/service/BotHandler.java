@@ -48,7 +48,7 @@ public class BotHandler implements SpringLongPollingBot {
 
 	private Set<Long> allowedUserIds;
 	private Set<Long> allowedChatsIds;
-	private final AtomicBoolean substitution = new AtomicBoolean(true);
+	private final AtomicBoolean isSubstitutionEnabled = new AtomicBoolean(true);
 
 	@PostConstruct
 	private void init() {
@@ -81,16 +81,16 @@ public class BotHandler implements SpringLongPollingBot {
 		try {
 			if (inputText.equals("Катя, замена")) {
 				sendByUpdate("ок, обрабатываю ютуб", update);
-				substitution.set(true);
+				isSubstitutionEnabled.set(true);
 				return;
 			} else if (inputText.equals("Катя, стоп")) {
 				sendByUpdate("ок, больше не обрабатываю ютуб", update);
-				substitution.set(false);
+				isSubstitutionEnabled.set(false);
 				return;
 			}
 
 			if (isItHost(getURL(parseUrlWithSign(inputText)), YOUTUBE)) {
-				if (substitution.get()) {
+				if (isSubstitutionEnabled.get()) {
 					groupChat(update);
 				} else if (inputText.startsWith("!")) {
 					groupChat(update);
