@@ -58,20 +58,22 @@ public class BotHandler implements SpringLongPollingBot {
 
 	@Override
 	public void consume(Update update) {
-		if (update.hasMessage() && update.getMessage().hasText()) {
-			long chatId = update.getMessage().getChat().getId();
-			long userId = update.getMessage().getFrom().getId();
+		if (!update.hasMessage() || !update.getMessage().hasText()) {
+			return;
+		}
 
-			if (chatId == userId) {
-				if (allowedUserIds.contains(userId)) {
-					privateChat(update);
-				}
-			} else if (chatId == privateChatId) {
-				myPrivateChat(update);
-			} else {
-				if (allowedChatsIds.contains(chatId)) {
-					groupChat(update);
-				}
+		final long chatId = update.getMessage().getChatId();
+		final long userId = update.getMessage().getFrom().getId();
+
+		if (chatId == userId) {
+			if (allowedUserIds.contains(userId)) {
+				privateChat(update);
+			}
+		} else if (chatId == privateChatId) {
+			myPrivateChat(update);
+		} else {
+			if (allowedChatsIds.contains(chatId)) {
+				groupChat(update);
 			}
 		}
 	}
