@@ -17,7 +17,6 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.net.URI;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -53,8 +52,8 @@ public class BotHandler implements SpringLongPollingBot {
 
 	@PostConstruct
 	private void init() {
-		this.allowedUserIds = new HashSet<>(asList(allowedUserIdsArr));
-		this.allowedChatsIds = new HashSet<>(asList(allowedChatsIdsArr));
+		this.allowedUserIds = Set.copyOf(asList(allowedUserIdsArr));
+		this.allowedChatsIds = Set.copyOf(asList(allowedChatsIdsArr));
 	}
 
 	@Override
@@ -107,13 +106,13 @@ public class BotHandler implements SpringLongPollingBot {
 		String inputText = update.getMessage().getText();
 		try {
 			URI uri = getURL(parseUrlWithSign(inputText));
-			logMessageIfHasUrl(update);
+			logMessageWithUrl(update);
 			String text = buildTextMessage(uri, update);
 			socialHandlerService.handleByHost(uri, update, text, true);
 			bot.deleteMessage(update);
 		} catch (InvalidUrlException | UnknownHostException ignored) {
 		} catch (NotSendException e) {
-			log.error("error sending message by {}", inputText);
+			log.error("Error sending message: {}", inputText, e);
 		}
 	}
 
@@ -125,7 +124,7 @@ public class BotHandler implements SpringLongPollingBot {
 		}
 		try {
 			URI uri = getURL(inputText);
-			logMessageIfHasUrl(update);
+			logMessageWithUrl(update);
 			socialHandlerService.handleByHost(uri, update, "", false);
 		} catch (InvalidUrlException e) {
 			sendByUpdate("Какая-то неправильная у вас ссылка :(", update);
@@ -160,14 +159,14 @@ public class BotHandler implements SpringLongPollingBot {
 		}
 	}
 
-	private void logMessageIfHasUrl(Update update) {
+	private void logMessageWithUrl(Update update) {
 		try {
 			getURL(update.getMessage().getText());
-			long chatId = update.getMessage().getChat().getId();
-			long userId = update.getMessage().getFrom().getId();
-			log.info("new message {} in chat {} from {}", update.getMessage().getText(), chatId, userId);
+			log.info("New message in chat {} from {}: {}",
+					update.getMessage().getChatId(),
+					update.getMessage().getFrom().getId(),
+					update.getMessage().getText());
 		} catch (InvalidUrlException | UnknownHostException ignored) {
-
 		}
 	}
 
