@@ -1,18 +1,18 @@
 package art.aelaort.service.social.ig;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import art.aelaort.utils.BotUtils;
-import art.aelaort.exceptions.NotSendException;
 import art.aelaort.dto.instagram.MediaUrl;
 import art.aelaort.dto.instagram.PhotoUrl;
 import art.aelaort.dto.instagram.VideoUrl;
+import art.aelaort.exceptions.NotSendException;
+import art.aelaort.utils.BotUtils;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaVideo;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.io.InputStream;
@@ -27,13 +27,13 @@ public class InstagramHandler {
 	private final InstagramService instagram;
 	private final TelegramClient telegramClient;
 
-	public void handle(URI uri, Update update, String text) {
+	public void handle(URI uri, Message message, String text) {
 		try {
-			sendBytes(uri, update, text);
+			sendBytes(uri, message, text);
 		} catch (Exception e) {
 			log.error("error send instagram file, trying send url - {}", uri, e);
 			try {
-				sendLinks(uri, update, text);
+				sendLinks(uri, message, text);
 			} catch (RuntimeException ex) {
 				log.error("error send instagram - {}", uri, e);
 				throw new NotSendException();
@@ -41,24 +41,24 @@ public class InstagramHandler {
 		}
 	}
 
-	private void sendLinks(URI uri, Update update, String text) {
+	private void sendLinks(URI uri, Message message, String text) {
 		List<MediaUrl> urls = instagram.getMediaUrls(uri);
 		if (urls.size() == 1) {
-			sendMediaByUpdate(update, text, urls.get(0), new InputFile(urls.get(0).getUrl()));
+			sendMediaByUpdate(message, text, urls.get(0), new InputFile(urls.get(0).getUrl()));
 		} else {
 			List<InputMedia> list = urls.stream().map(this::getInputMediaLink).toList();
-			BotUtils.sendMediasByUpdate(update, list, text, telegramClient);
+			BotUtils.sendMediasByUpdate(message, list, text, telegramClient);
 		}
 	}
 
-	private void sendBytes(URI uri, Update update, String text) {
+	private void sendBytes(URI uri, Message message, String text) {
 		List<MediaUrl> urls = instagram.getMediaUrls(uri);
 		if (urls.size() == 1) {
 			InputStream inputStream = instagram.download(urls.get(0));
-			sendMediaByUpdate(update, text, urls.get(0), getISByUrl(inputStream));
+			sendMediaByUpdate(message, text, urls.get(0), getISByUrl(inputStream));
 		} else {
 			List<InputMedia> list = urls.stream().map(this::getInputMediaIS).toList();
-			BotUtils.sendMediasByUpdate(update, list, text, telegramClient);
+			BotUtils.sendMediasByUpdate(message, list, text, telegramClient);
 		}
 	}
 
@@ -86,11 +86,11 @@ public class InstagramHandler {
 		throw new IllegalArgumentException();
 	}
 
-	private void sendMediaByUpdate(Update update, String text, MediaUrl url, InputFile file) {
+	private void sendMediaByUpdate(Message message, String text, MediaUrl url, InputFile file) {
 		if (url instanceof VideoUrl) {
-			BotUtils.sendVideoByUpdate(update, text, file, telegramClient);
+			BotUtils.sendVideoByUpdate(message, text, file, telegramClient);
 		} else if (url instanceof PhotoUrl) {
-			BotUtils.sendImageByUpdate(update, text, file, telegramClient);
+			BotUtils.sendImageByUpdate(message, text, file, telegramClient);
 		}
 	}
 }

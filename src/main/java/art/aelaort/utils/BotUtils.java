@@ -1,11 +1,11 @@
 package art.aelaort.utils;
 
-import com.google.common.collect.Lists;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import art.aelaort.exceptions.InvalidUrlException;
 import art.aelaort.exceptions.UnknownHostException;
 import art.aelaort.service.social.KnownHosts;
+import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -13,7 +13,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
@@ -37,26 +36,25 @@ import static art.aelaort.TelegramClientHelpers.execute;
 public class BotUtils {
 	private final TelegramClient telegramClient;
 
-	public static void sendByUpdate(String text, Update update, TelegramClient telegramClient) {
-		Message message = update.getMessage();
+	public static void sendByUpdate(String text, Message message, TelegramClient telegramClient) {
 		execute(SendMessage.builder()
 						.chatId(message.getChatId())
 						.text(text),
 				telegramClient);
 	}
 
-	public void sendMarkdown(Update update, String text) {
+	public void sendMarkdown(Message message, String text) {
 		execute(SendMessage.builder()
-						.chatId(update.getMessage().getChatId())
+						.chatId(message.getChatId())
 						.text(text)
 						.parseMode("markdown")
 						.disableWebPagePreview(true),
 				telegramClient);
 	}
 
-	public void deleteMessage(Update update) {
-		long chatId = update.getMessage().getChatId();
-		int messageId = update.getMessage().getMessageId();
+	public void deleteMessage(Message message) {
+		long chatId = message.getChatId();
+		int messageId = message.getMessageId();
 		try {
 			telegramClient.execute(new DeleteMessage(String.valueOf(chatId), messageId));
 			log.debug("telegram - deleted message, chat {} messageId {}", chatId, messageId);
@@ -65,74 +63,74 @@ public class BotUtils {
 		}
 	}
 
-	public void sendVideoByUpdate(Update update, String text, InputStream dataStream) {
-		sendVideoByUpdate(update, text, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
+	public void sendVideoByUpdate(Message message, String text, InputStream dataStream) {
+		sendVideoByUpdate(message, text, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 
-	public void sendVideoByUpdate(Update update, String text, Path path) {
-		sendVideoByUpdate(update, text, new InputFile(path.toFile(), UUID.randomUUID() + ".mp4"), telegramClient);
+	public void sendVideoByUpdate(Message message, String text, Path path) {
+		sendVideoByUpdate(message, text, new InputFile(path.toFile(), UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 
-	public static void sendVideoByUpdate(Update update, String text, InputFile inputFile, TelegramClient telegramClient) {
+	public static void sendVideoByUpdate(Message message, String text, InputFile inputFile, TelegramClient telegramClient) {
 		execute(SendVideo.builder()
-						.chatId(update.getMessage().getChatId())
+						.chatId(message.getChatId())
 						.caption(text)
 						.parseMode("markdown")
 						.video(inputFile),
 				telegramClient);
 	}
 
-	public static void sendImageByUpdate(Update update, String text, InputFile inputFile, TelegramClient telegramClient) {
+	public static void sendImageByUpdate(Message message, String text, InputFile inputFile, TelegramClient telegramClient) {
 		execute(SendPhoto.builder()
-						.chatId(update.getMessage().getChatId())
+						.chatId(message.getChatId())
 						.caption(text)
 						.parseMode("markdown")
 						.photo(inputFile),
 				telegramClient);
 	}
 
-	public static void sendMediasByUpdate(Update update, List<InputMedia> inputMedias, String text, TelegramClient telegramClient) {
+	public static void sendMediasByUpdate(Message message, List<InputMedia> inputMedias, String text, TelegramClient telegramClient) {
 		if (inputMedias.isEmpty()) {
 			return;
 		}
 
-		if (update.getMessage().isGroupMessage() || update.getMessage().isSuperGroupMessage()) {
+		if (message.isGroupMessage() || message.isSuperGroupMessage()) {
 			if (inputMedias.size() > 10) {
-				sendMedias(update, inputMedias.subList(0, 10), text, telegramClient);
+				sendMedias(message, inputMedias.subList(0, 10), text, telegramClient);
 				sleep(500);
 				String s = "Больше 10 фото в группу не имею присылать((\nА прислано было %d фото".formatted(inputMedias.size());
 				execute(SendMessage.builder()
 								.text(s)
-								.chatId(update.getMessage().getChatId()),
+								.chatId(message.getChatId()),
 						telegramClient);
 			} else {
-				sendMedias(update, inputMedias, text, telegramClient);
+				sendMedias(message, inputMedias, text, telegramClient);
 			}
 		} else {
 			List<List<InputMedia>> partitions = Lists.partition(inputMedias, 10);
 			for (List<InputMedia> medias : partitions) {
-				sendMedias(update, medias, text, telegramClient);
+				sendMedias(message, medias, text, telegramClient);
 			}
 		}
 	}
 
-	private static void sendMedias(Update update, List<InputMedia> photos, String text, TelegramClient telegramClient) {
+	private static void sendMedias(Message message, List<InputMedia> photos, String text, TelegramClient telegramClient) {
 		photos.get(0).setCaption(text);
 		photos.get(0).setParseMode("markdown");
 		execute(SendMediaGroup.builder()
-						.chatId(update.getMessage().getChatId())
+						.chatId(message.getChatId())
 						.medias(photos),
 				telegramClient);
 	}
 
-	public static void sendImagesByUpdate(Update update, List<String> imagesUrls, String text, TelegramClient telegramClient) {
+	public static void sendImagesByUpdate(Message message, List<String> imagesUrls, String text, TelegramClient telegramClient) {
 		if (imagesUrls.isEmpty()) {
 			return;
 		}
 
 		if (imagesUrls.size() == 1) {
 			execute(SendPhoto.builder()
-							.chatId(update.getMessage().getChatId())
+							.chatId(message.getChatId())
 							.caption(text)
 							.parseMode("markdown")
 							.photo(new InputFile(imagesUrls.get(0))),
@@ -142,32 +140,32 @@ public class BotUtils {
 					.map(InputMediaPhoto::new)
 					.toList();
 
-			if (update.getMessage().isGroupMessage() || update.getMessage().isSuperGroupMessage()) {
+			if (message.isGroupMessage() || message.isSuperGroupMessage()) {
 				if (inputMediaPhotos.size() > 10) {
-					sendPhotos(update, inputMediaPhotos.subList(0, 10), text, telegramClient);
+					sendPhotos(message, inputMediaPhotos.subList(0, 10), text, telegramClient);
 					sleep(500);
 					String s = "Больше 10 фото в группу не имею присылать((\nА прислано было %d фото".formatted(imagesUrls.size());
 					execute(SendMessage.builder()
 							.text(s)
-							.chatId(update.getMessage().getChatId()),
+							.chatId(message.getChatId()),
 							telegramClient);
 				} else {
-					sendPhotos(update, inputMediaPhotos, text, telegramClient);
+					sendPhotos(message, inputMediaPhotos, text, telegramClient);
 				}
 			} else {
 				List<List<InputMediaPhoto>> partitions = Lists.partition(inputMediaPhotos, 10);
 				for (List<InputMediaPhoto> photos : partitions) {
-					sendPhotos(update, photos, text, telegramClient);
+					sendPhotos(message, photos, text, telegramClient);
 				}
 			}
 		}
 	}
 
-	private static void sendPhotos(Update update, List<InputMediaPhoto> photos, String text, TelegramClient telegramClient) {
+	private static void sendPhotos(Message message, List<InputMediaPhoto> photos, String text, TelegramClient telegramClient) {
 		photos.get(0).setCaption(text);
 		photos.get(0).setParseMode("markdown");
 		execute(SendMediaGroup.builder()
-						.chatId(update.getMessage().getChatId())
+						.chatId(message.getChatId())
 						.medias(photos),
 				telegramClient);
 	}

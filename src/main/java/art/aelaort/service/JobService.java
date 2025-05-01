@@ -15,7 +15,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 
 import java.io.IOException;
 import java.net.URI;
@@ -30,11 +30,11 @@ import java.util.concurrent.TimeUnit;
 public class JobService {
 	private final ResourceLoader resourceLoader;
 
-	public void runJob(URI uri, Update update, String text, boolean isDeleteSourceMessage) {
+	public void runJob(URI uri, Message message, String text, boolean isDeleteSourceMessage) {
 		try (KubernetesClient client = new KubernetesClientBuilder().build()) {
 			Job newJob = parseJob("job.yaml");
 
-			JobData jobData = new JobData(uri, update, text, isDeleteSourceMessage);
+			JobData jobData = new JobData(uri, message, text, isDeleteSourceMessage);
 			String jobDataStr = TelegramUtils.serializeJobData(jobData);
 
 			List<EnvVar> env = newJob.getSpec().getTemplate().getSpec().getContainers().get(0).getEnv();

@@ -1,12 +1,12 @@
 package art.aelaort.service.social.tiktok;
 
 import art.aelaort.dto.tiktok.VideoData;
+import art.aelaort.utils.BotUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import art.aelaort.utils.BotUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.io.InputStream;
@@ -21,27 +21,27 @@ public class TikTokHandler {
 	private final TikTokService tiktok;
 	private final TelegramClient telegramClient;
 
-	public void handle(URI uri, Update update, String text) {
+	public void handle(URI uri, Message message, String text) {
 		VideoData data = tiktok.getData(uri);
 		if (tiktok.isVideo(data)) {
-			tiktokSendVideo(data, uri, update, text);
+			tiktokSendVideo(data, uri, message, text);
 		} else {
-			tiktokSendImages(data, update, text);
+			tiktokSendImages(data, message, text);
 		}
 	}
 
-	private void tiktokSendImages(VideoData data, Update update, String text) {
+	private void tiktokSendImages(VideoData data, Message message, String text) {
 		List<String> imagesUrls = tiktok.getImagesUrls(data);
-		BotUtils.sendImagesByUpdate(update, imagesUrls, text, telegramClient);
+		BotUtils.sendImagesByUpdate(message, imagesUrls, text, telegramClient);
 	}
 
-	private void tiktokSendVideo(VideoData data, URI uri, Update update, String text) {
+	private void tiktokSendVideo(VideoData data, URI uri, Message message, String text) {
 		List<String> urls = tiktok.getVideoMediaUrls(data);
 
 		for (String url : urls) {
 			try {
 				InputStream file = tiktok.download(url);
-				sendVideoByUpdate(update, text, file);
+				sendVideoByUpdate(message, text, file);
 
 				return;
 			} catch (Exception e) {
@@ -52,7 +52,7 @@ public class TikTokHandler {
 
 		for (String url : urls) {
 			try {
-				sendVideoByUpdate(update, text, url);
+				sendVideoByUpdate(message, text, url);
 
 				return;
 			} catch (Exception e) {
@@ -63,11 +63,11 @@ public class TikTokHandler {
 		log.error("error send tiktok - {}", uri);
 	}
 
-	public void sendVideoByUpdate(Update update, String text, InputStream dataStream) {
-		BotUtils.sendVideoByUpdate(update, text, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
+	public void sendVideoByUpdate(Message message, String text, InputStream dataStream) {
+		BotUtils.sendVideoByUpdate(message, text, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 
-	public void sendVideoByUpdate(Update update, String text, String videoUrl) {
-		BotUtils.sendVideoByUpdate(update, text, new InputFile(videoUrl), telegramClient);
+	public void sendVideoByUpdate(Message message, String text, String videoUrl) {
+		BotUtils.sendVideoByUpdate(message, text, new InputFile(videoUrl), telegramClient);
 	}
 }

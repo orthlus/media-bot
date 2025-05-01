@@ -14,6 +14,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.net.URI;
@@ -65,29 +66,30 @@ public class BotHandler implements SpringLongPollingBot {
 			return;
 		}
 
-		final long chatId = update.getMessage().getChatId();
-		final long userId = update.getMessage().getFrom().getId();
+		Message message = update.getMessage();
+		final long chatId = message.getChatId();
+		final long userId = message.getFrom().getId();
 
 		if (chatId == userId) {
-			handlePrivateUserChat(update, userId);
+			handlePrivateUserChat(message, userId);
 		} else if (chatId == privateChatId) {
-			handleMyPrivateChat(update);
+			handleMyPrivateChat(message);
 		} else if (allowedChatsIds.contains(chatId)) {
-			groupChat(update);
+			groupChat(message);
 		}
 	}
 
-	private void handlePrivateUserChat(Update update, long userId) {
+	private void handlePrivateUserChat(Message message, long userId) {
 		if (allowedUserIds.contains(userId)) {
-			privateChat(update);
+			privateChat(message);
 		}
 	}
 
-	private void handleMyPrivateChat(Update update) {
-		String inputText = update.getMessage().getText();
+	private void handleMyPrivateChat(Message message) {
+		String inputText = message.getText();
 
 		if (substitutionCommands.contains(inputText)) {
-			handleSubstitutionCommands(inputText, update);
+			handleSubstitutionCommands(inputText, message);
 			return;
 		}
 
@@ -95,10 +97,10 @@ public class BotHandler implements SpringLongPollingBot {
 			URI uri = getURL(parseUrlWithSign(inputText));
 			if (isItHost(uri, YOUTUBE)) {
 				if (shouldProcessYoutube(inputText)) {
-					groupChat(update);
+					groupChat(message);
 				}
 			} else {
-				groupChat(update);
+				groupChat(message);
 			}
 		} catch (InvalidUrlException | UnknownHostException ignored) {
 		}
@@ -108,50 +110,50 @@ public class BotHandler implements SpringLongPollingBot {
 		return isSubstitutionEnabled.get() || inputText.startsWith("!");
 	}
 
-	private void handleSubstitutionCommands(String inputText, Update update) {
+	private void handleSubstitutionCommands(String inputText, Message message) {
 		if (substitutionCommandTrue.equals(inputText)) {
-			sendByUpdate("ок, обрабатываю ютуб", update);
+			sendByUpdate("ок, обрабатываю ютуб", message);
 			isSubstitutionEnabled.set(true);
 		} else if (substitutionCommandFalse.equals(inputText)) {
-			sendByUpdate("ок, больше не обрабатываю ютуб", update);
+			sendByUpdate("ок, больше не обрабатываю ютуб", message);
 			isSubstitutionEnabled.set(false);
 		}
 	}
 
-	private void groupChat(Update update) {
-		String inputText = update.getMessage().getText();
+	private void groupChat(Message message) {
+		String inputText = message.getText();
 		try {
 			URI uri = getURL(parseUrlWithSign(inputText));
-			logMessageWithUrl(update);
-			String text = buildTextMessage(uri, update);
-			jobService.runJob(uri, update, text, true);
-			bot.deleteMessage(update);
+			logMessageWithUrl(message);
+			String text = buildTextMessage(uri, message);
+			jobService.runJob(uri, message, text, true);
+			bot.deleteMessage(message);
 		} catch (InvalidUrlException | UnknownHostException ignored) {
 		} catch (NotSendException e) {
 			log.error("Error sending message: {}", inputText, e);
 		}
 	}
 
-	private void privateChat(Update update) {
-		String inputText = update.getMessage().getText();
+	private void privateChat(Message message) {
+		String inputText = message.getText();
 		if (inputText.equals("/start")) {
-			sendByUpdate("Привет! Скачаю медиа по ссылке", update);
+			sendByUpdate("Привет! Скачаю медиа по ссылке", message);
 			return;
 		}
 		try {
 			URI uri = getURL(inputText);
-			logMessageWithUrl(update);
-			jobService.runJob(uri, update, "", false);
+			logMessageWithUrl(message);
+			jobService.runJob(uri, message, "", false);
 		} catch (InvalidUrlException e) {
-			sendByUpdate("Какая-то неправильная у вас ссылка :(", update);
+			sendByUpdate("Какая-то неправильная у вас ссылка :(", message);
 		} catch (UnknownHostException e) {
-			sendByUpdate("Неизвестный хост", update);
+			sendByUpdate("Неизвестный хост", message);
 		}
 	}
 
-	private String buildTextMessage(URI uri, Update update) {
+	private String buildTextMessage(URI uri, Message message) {
 		try {
-			User user = update.getMessage().getFrom();
+			User user = message.getFrom();
 			String lastName = user.getLastName();
 			String firstName = user.getFirstName();
 			String userName = user.getUserName();
@@ -175,18 +177,18 @@ public class BotHandler implements SpringLongPollingBot {
 		}
 	}
 
-	private void logMessageWithUrl(Update update) {
+	private void logMessageWithUrl(Message message) {
 		try {
-			getURL(update.getMessage().getText());
+			getURL(message.getText());
 			log.info("New message in chat {} from {}: {}",
-					update.getMessage().getChatId(),
-					update.getMessage().getFrom().getId(),
-					update.getMessage().getText());
+					message.getChatId(),
+					message.getFrom().getId(),
+					message.getText());
 		} catch (InvalidUrlException | UnknownHostException ignored) {
 		}
 	}
 
-	private void sendByUpdate(String text, Update update) {
-		BotUtils.sendByUpdate(text, update, telegramClient);
+	private void sendByUpdate(String text, Message message) {
+		BotUtils.sendByUpdate(text, message, telegramClient);
 	}
 }

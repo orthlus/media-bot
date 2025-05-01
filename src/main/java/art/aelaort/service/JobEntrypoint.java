@@ -27,7 +27,7 @@ public class JobEntrypoint implements CommandLineRunner {
 		log.info("job started with uri: {}", jobData.uri());
 		socialHandlerService.handleByHost(
 				jobData.uri(),
-				jobData.update(),
+				jobData.message(),
 				jobData.text(),
 				jobData.isDeleteSourceMessage()
 		);
