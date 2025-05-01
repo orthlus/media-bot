@@ -49,6 +49,9 @@ public class BotHandler implements SpringLongPollingBot {
 	private Set<Long> allowedUserIds;
 	private Set<Long> allowedChatsIds;
 	private final AtomicBoolean isSubstitutionEnabled = new AtomicBoolean(true);
+	private final String substitutionCommandTrue = "Катя, замена";
+	private final String substitutionCommandFalse = "Катя, стоп";
+	private final Set<String> substitutionCommands = Set.of(substitutionCommandTrue, substitutionCommandFalse);
 
 	@PostConstruct
 	private void init() {
@@ -66,41 +69,48 @@ public class BotHandler implements SpringLongPollingBot {
 		final long userId = update.getMessage().getFrom().getId();
 
 		if (chatId == userId) {
-			if (allowedUserIds.contains(userId)) {
-				privateChat(update);
-			}
+			handlePrivateUserChat(update, userId);
 		} else if (chatId == privateChatId) {
-			myPrivateChat(update);
-		} else {
-			if (allowedChatsIds.contains(chatId)) {
-				groupChat(update);
-			}
+			handleMyPrivateChat(update);
+		} else if (allowedChatsIds.contains(chatId)) {
+			groupChat(update);
 		}
 	}
 
-	private void myPrivateChat(Update update) {
-		String inputText = update.getMessage().getText();
-		try {
-			if (inputText.equals("Катя, замена")) {
-				sendByUpdate("ок, обрабатываю ютуб", update);
-				isSubstitutionEnabled.set(true);
-				return;
-			} else if (inputText.equals("Катя, стоп")) {
-				sendByUpdate("ок, больше не обрабатываю ютуб", update);
-				isSubstitutionEnabled.set(false);
-				return;
-			}
+	private void handlePrivateUserChat(Update update, long userId) {
+		if (allowedUserIds.contains(userId)) {
+			privateChat(update);
+		}
+	}
 
-			if (isItHost(getURL(parseUrlWithSign(inputText)), YOUTUBE)) {
-				if (isSubstitutionEnabled.get()) {
-					groupChat(update);
-				} else if (inputText.startsWith("!")) {
-					groupChat(update);
-				}
-			} else {
+	private void handleMyPrivateChat(Update update) {
+		String inputText = update.getMessage().getText();
+
+		if (substitutionCommands.contains(inputText)) {
+			handleSubstitutionCommands(inputText, update);
+			return;
+		}
+
+		try {
+			URI uri = getURL(parseUrlWithSign(inputText));
+			if (shouldProcessYoutube(inputText, uri)) {
 				groupChat(update);
 			}
 		} catch (InvalidUrlException | UnknownHostException ignored) {
+		}
+	}
+
+	private boolean shouldProcessYoutube(String inputText, URI uri) {
+		return isItHost(uri, YOUTUBE) && (isSubstitutionEnabled.get() || inputText.startsWith("!"));
+	}
+
+	private void handleSubstitutionCommands(String inputText, Update update) {
+		if (substitutionCommandTrue.equals(inputText)) {
+			sendByUpdate("ок, обрабатываю ютуб", update);
+			isSubstitutionEnabled.set(true);
+		} else if (substitutionCommandFalse.equals(inputText)) {
+			sendByUpdate("ок, больше не обрабатываю ютуб", update);
+			isSubstitutionEnabled.set(false);
 		}
 	}
 
