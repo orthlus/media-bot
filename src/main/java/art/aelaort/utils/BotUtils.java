@@ -65,27 +65,27 @@ public class BotUtils {
 		}
 	}
 
-	public void sendVideoByUpdate(Update update, String message, InputStream dataStream) {
-		sendVideoByUpdate(update, message, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
+	public void sendVideoByUpdate(Update update, String text, InputStream dataStream) {
+		sendVideoByUpdate(update, text, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 
-	public void sendVideoByUpdate(Update update, String message, Path path) {
-		sendVideoByUpdate(update, message, new InputFile(path.toFile(), UUID.randomUUID() + ".mp4"), telegramClient);
+	public void sendVideoByUpdate(Update update, String text, Path path) {
+		sendVideoByUpdate(update, text, new InputFile(path.toFile(), UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 
-	public static void sendVideoByUpdate(Update update, String message, InputFile inputFile, TelegramClient telegramClient) {
+	public static void sendVideoByUpdate(Update update, String text, InputFile inputFile, TelegramClient telegramClient) {
 		execute(SendVideo.builder()
 						.chatId(update.getMessage().getChatId())
-						.caption(message)
+						.caption(text)
 						.parseMode("markdown")
 						.video(inputFile),
 				telegramClient);
 	}
 
-	public static void sendImageByUpdate(Update update, String message, InputFile inputFile, TelegramClient telegramClient) {
+	public static void sendImageByUpdate(Update update, String text, InputFile inputFile, TelegramClient telegramClient) {
 		execute(SendPhoto.builder()
 						.chatId(update.getMessage().getChatId())
-						.caption(message)
+						.caption(text)
 						.parseMode("markdown")
 						.photo(inputFile),
 				telegramClient);

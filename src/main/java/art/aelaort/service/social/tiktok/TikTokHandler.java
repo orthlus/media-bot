@@ -63,11 +63,11 @@ public class TikTokHandler {
 		log.error("error send tiktok - {}", uri);
 	}
 
-	public void sendVideoByUpdate(Update update, String message, InputStream dataStream) {
-		BotUtils.sendVideoByUpdate(update, message, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
+	public void sendVideoByUpdate(Update update, String text, InputStream dataStream) {
+		BotUtils.sendVideoByUpdate(update, text, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 
-	public void sendVideoByUpdate(Update update, String message, String videoUrl) {
-		BotUtils.sendVideoByUpdate(update, message, new InputFile(videoUrl), telegramClient);
+	public void sendVideoByUpdate(Update update, String text, String videoUrl) {
+		BotUtils.sendVideoByUpdate(update, text, new InputFile(videoUrl), telegramClient);
 	}
 }

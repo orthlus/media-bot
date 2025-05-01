@@ -86,11 +86,11 @@ public class InstagramHandler {
 		throw new IllegalArgumentException();
 	}
 
-	private void sendMediaByUpdate(Update update, String message, MediaUrl url, InputFile file) {
+	private void sendMediaByUpdate(Update update, String text, MediaUrl url, InputFile file) {
 		if (url instanceof VideoUrl) {
-			BotUtils.sendVideoByUpdate(update, message, file, telegramClient);
+			BotUtils.sendVideoByUpdate(update, text, file, telegramClient);
 		} else if (url instanceof PhotoUrl) {
-			BotUtils.sendImageByUpdate(update, message, file, telegramClient);
+			BotUtils.sendImageByUpdate(update, text, file, telegramClient);
 		}
 	}
 }
