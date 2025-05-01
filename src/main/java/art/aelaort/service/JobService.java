@@ -43,7 +43,6 @@ public class JobService {
 			client.batch().v1().jobs()
 //					.inNamespace("default")
 					.resource(job).create();
-			System.out.println("Job from YAML created successfully!");
 		}
 	}
 
