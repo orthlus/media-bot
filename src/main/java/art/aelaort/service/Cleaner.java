@@ -2,6 +2,7 @@ package art.aelaort.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "run.mode", havingValue = "bot")
 public class Cleaner {
 	@Value("${ytdlp.dir}")
 	private String ytdlpDir;
