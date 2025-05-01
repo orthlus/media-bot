@@ -42,8 +42,9 @@ public class JobService {
 			env.add(envVar("job_data", jobDataStr));
 			newJob.getMetadata().setName(newJob.getMetadata().getName() + UUID.randomUUID());
 
-			client.batch().v1().jobs()
-					.resource(newJob)
+			Job createdJob = client.batch().v1().jobs().resource(newJob).create();
+
+			client.batch().v1().jobs().withName(createdJob.getMetadata().getName())
 					.waitUntilCondition(this::isJobFinished, 30, TimeUnit.MINUTES);
 		} catch (KubernetesClientException e) {
 			log.error("Job creation or execution failed", e);
@@ -51,7 +52,9 @@ public class JobService {
 	}
 
 	private boolean isJobFinished(Job job) {
-		return job.getStatus() != null && (job.getStatus().getSucceeded() != null || job.getStatus().getFailed() != null);
+		return job != null
+			   && job.getStatus() != null
+			   && (job.getStatus().getSucceeded() != null || job.getStatus().getFailed() != null);
 	}
 
 	private EnvVar envVar(String name, String value) {
