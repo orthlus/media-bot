@@ -32,7 +32,7 @@ public class YoutubeHandler {
 			checkVideoDuration(uri, message, isDeleteSourceMessage);
 			Path file = ytdlp.downloadFileByUrl(uri, proxyUrl);
 			checkFileSize(file);
-			bot.sendVideoByUpdate(message, text, file);
+			bot.sendVideoByMessage(message, text, file);
 		} catch (YtdlpFileDownloadException e) {
 			log.error("youtube download error - YoutubeFileDownloadException");
 			bot.sendMarkdown(message, "Почему то не удалось скачать [файл](%s)".formatted(uri));

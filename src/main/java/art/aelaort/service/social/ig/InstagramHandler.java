@@ -44,10 +44,10 @@ public class InstagramHandler {
 	private void sendLinks(URI uri, Message message, String text) {
 		List<MediaUrl> urls = instagram.getMediaUrls(uri);
 		if (urls.size() == 1) {
-			sendMediaByUpdate(message, text, urls.get(0), new InputFile(urls.get(0).getUrl()));
+			sendMediaByMessage(message, text, urls.get(0), new InputFile(urls.get(0).getUrl()));
 		} else {
 			List<InputMedia> list = urls.stream().map(this::getInputMediaLink).toList();
-			BotUtils.sendMediasByUpdate(message, list, text, telegramClient);
+			BotUtils.sendMediasByMessage(message, list, text, telegramClient);
 		}
 	}
 
@@ -55,10 +55,10 @@ public class InstagramHandler {
 		List<MediaUrl> urls = instagram.getMediaUrls(uri);
 		if (urls.size() == 1) {
 			InputStream inputStream = instagram.download(urls.get(0));
-			sendMediaByUpdate(message, text, urls.get(0), getISByUrl(inputStream));
+			sendMediaByMessage(message, text, urls.get(0), getISByUrl(inputStream));
 		} else {
 			List<InputMedia> list = urls.stream().map(this::getInputMediaIS).toList();
-			BotUtils.sendMediasByUpdate(message, list, text, telegramClient);
+			BotUtils.sendMediasByMessage(message, list, text, telegramClient);
 		}
 	}
 
@@ -86,11 +86,11 @@ public class InstagramHandler {
 		throw new IllegalArgumentException();
 	}
 
-	private void sendMediaByUpdate(Message message, String text, MediaUrl url, InputFile file) {
+	private void sendMediaByMessage(Message message, String text, MediaUrl url, InputFile file) {
 		if (url instanceof VideoUrl) {
-			BotUtils.sendVideoByUpdate(message, text, file, telegramClient);
+			BotUtils.sendVideoByMessage(message, text, file, telegramClient);
 		} else if (url instanceof PhotoUrl) {
-			BotUtils.sendImageByUpdate(message, text, file, telegramClient);
+			BotUtils.sendImageByMessage(message, text, file, telegramClient);
 		}
 	}
 }

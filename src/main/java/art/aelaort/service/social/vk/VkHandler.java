@@ -31,7 +31,7 @@ public class VkHandler {
 			checkVideoDuration(uri, message, isDeleteSourceMessage);
 			Path file = ytdlp.downloadFileByUrl(uri);
 			checkFileSize(file);
-			bot.sendVideoByUpdate(message, text, file);
+			bot.sendVideoByMessage(message, text, file);
 		} catch (NotSupportedVkMediaException e) {
 			bot.sendMarkdown(message, "Это ([это](%s)) не поддерживается для скачивания :(".formatted(uri));
 		} catch (YtdlpFileDownloadException e) {

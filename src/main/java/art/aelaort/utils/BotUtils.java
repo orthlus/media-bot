@@ -36,7 +36,7 @@ import static art.aelaort.TelegramClientHelpers.execute;
 public class BotUtils {
 	private final TelegramClient telegramClient;
 
-	public static void sendByUpdate(String text, Message message, TelegramClient telegramClient) {
+	public static void sendByMessage(String text, Message message, TelegramClient telegramClient) {
 		execute(SendMessage.builder()
 						.chatId(message.getChatId())
 						.text(text),
@@ -63,15 +63,15 @@ public class BotUtils {
 		}
 	}
 
-	public void sendVideoByUpdate(Message message, String text, InputStream dataStream) {
-		sendVideoByUpdate(message, text, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
+	public void sendVideoByMessage(Message message, String text, InputStream dataStream) {
+		sendVideoByMessage(message, text, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 
-	public void sendVideoByUpdate(Message message, String text, Path path) {
-		sendVideoByUpdate(message, text, new InputFile(path.toFile(), UUID.randomUUID() + ".mp4"), telegramClient);
+	public void sendVideoByMessage(Message message, String text, Path path) {
+		sendVideoByMessage(message, text, new InputFile(path.toFile(), UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 
-	public static void sendVideoByUpdate(Message message, String text, InputFile inputFile, TelegramClient telegramClient) {
+	public static void sendVideoByMessage(Message message, String text, InputFile inputFile, TelegramClient telegramClient) {
 		execute(SendVideo.builder()
 						.chatId(message.getChatId())
 						.caption(text)
@@ -80,7 +80,7 @@ public class BotUtils {
 				telegramClient);
 	}
 
-	public static void sendImageByUpdate(Message message, String text, InputFile inputFile, TelegramClient telegramClient) {
+	public static void sendImageByMessage(Message message, String text, InputFile inputFile, TelegramClient telegramClient) {
 		execute(SendPhoto.builder()
 						.chatId(message.getChatId())
 						.caption(text)
@@ -89,7 +89,7 @@ public class BotUtils {
 				telegramClient);
 	}
 
-	public static void sendMediasByUpdate(Message message, List<InputMedia> inputMedias, String text, TelegramClient telegramClient) {
+	public static void sendMediasByMessage(Message message, List<InputMedia> inputMedias, String text, TelegramClient telegramClient) {
 		if (inputMedias.isEmpty()) {
 			return;
 		}
@@ -123,7 +123,7 @@ public class BotUtils {
 				telegramClient);
 	}
 
-	public static void sendImagesByUpdate(Message message, List<String> imagesUrls, String text, TelegramClient telegramClient) {
+	public static void sendImagesByMessage(Message message, List<String> imagesUrls, String text, TelegramClient telegramClient) {
 		if (imagesUrls.isEmpty()) {
 			return;
 		}

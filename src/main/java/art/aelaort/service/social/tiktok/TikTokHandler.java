@@ -32,7 +32,7 @@ public class TikTokHandler {
 
 	private void tiktokSendImages(VideoData data, Message message, String text) {
 		List<String> imagesUrls = tiktok.getImagesUrls(data);
-		BotUtils.sendImagesByUpdate(message, imagesUrls, text, telegramClient);
+		BotUtils.sendImagesByMessage(message, imagesUrls, text, telegramClient);
 	}
 
 	private void tiktokSendVideo(VideoData data, URI uri, Message message, String text) {
@@ -41,7 +41,7 @@ public class TikTokHandler {
 		for (String url : urls) {
 			try {
 				InputStream file = tiktok.download(url);
-				sendVideoByUpdate(message, text, file);
+				sendVideoByMessage(message, text, file);
 
 				return;
 			} catch (Exception e) {
@@ -52,7 +52,7 @@ public class TikTokHandler {
 
 		for (String url : urls) {
 			try {
-				sendVideoByUpdate(message, text, url);
+				sendVideoByMessage(message, text, url);
 
 				return;
 			} catch (Exception e) {
@@ -63,11 +63,11 @@ public class TikTokHandler {
 		log.error("error send tiktok - {}", uri);
 	}
 
-	public void sendVideoByUpdate(Message message, String text, InputStream dataStream) {
-		BotUtils.sendVideoByUpdate(message, text, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
+	public void sendVideoByMessage(Message message, String text, InputStream dataStream) {
+		BotUtils.sendVideoByMessage(message, text, new InputFile(dataStream, UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 
-	public void sendVideoByUpdate(Message message, String text, String videoUrl) {
-		BotUtils.sendVideoByUpdate(message, text, new InputFile(videoUrl), telegramClient);
+	public void sendVideoByMessage(Message message, String text, String videoUrl) {
+		BotUtils.sendVideoByMessage(message, text, new InputFile(videoUrl), telegramClient);
 	}
 }

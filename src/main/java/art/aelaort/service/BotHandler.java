@@ -112,10 +112,10 @@ public class BotHandler implements SpringLongPollingBot {
 
 	private void handleSubstitutionCommands(String inputText, Message message) {
 		if (substitutionCommandTrue.equals(inputText)) {
-			sendByUpdate("ок, обрабатываю ютуб", message);
+			sendByMessage("ок, обрабатываю ютуб", message);
 			isSubstitutionEnabled.set(true);
 		} else if (substitutionCommandFalse.equals(inputText)) {
-			sendByUpdate("ок, больше не обрабатываю ютуб", message);
+			sendByMessage("ок, больше не обрабатываю ютуб", message);
 			isSubstitutionEnabled.set(false);
 		}
 	}
@@ -137,7 +137,7 @@ public class BotHandler implements SpringLongPollingBot {
 	private void privateChat(Message message) {
 		String inputText = message.getText();
 		if (inputText.equals("/start")) {
-			sendByUpdate("Привет! Скачаю медиа по ссылке", message);
+			sendByMessage("Привет! Скачаю медиа по ссылке", message);
 			return;
 		}
 		try {
@@ -145,9 +145,9 @@ public class BotHandler implements SpringLongPollingBot {
 			logMessageWithUrl(message);
 			jobService.runJob(uri, message, "", false);
 		} catch (InvalidUrlException e) {
-			sendByUpdate("Какая-то неправильная у вас ссылка :(", message);
+			sendByMessage("Какая-то неправильная у вас ссылка :(", message);
 		} catch (UnknownHostException e) {
-			sendByUpdate("Неизвестный хост", message);
+			sendByMessage("Неизвестный хост", message);
 		}
 	}
 
@@ -188,7 +188,7 @@ public class BotHandler implements SpringLongPollingBot {
 		}
 	}
 
-	private void sendByUpdate(String text, Message message) {
-		BotUtils.sendByUpdate(text, message, telegramClient);
+	private void sendByMessage(String text, Message message) {
+		BotUtils.sendByMessage(text, message, telegramClient);
 	}
 }
