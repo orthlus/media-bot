@@ -12,12 +12,18 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "run.mode", havingValue = "job")
 public class JobEntrypoint implements CommandLineRunner {
+	private final SocialHandlerService socialHandlerService;
 	@Value("${job_data}")
 	private String jobDataString;
 
 	@Override
 	public void run(String... args) throws Exception {
 		JobData jobData = TelegramUtils.deserializeJobData(jobDataString);
-
+		socialHandlerService.handleByHost(
+				jobData.uri(),
+				jobData.update(),
+				jobData.text(),
+				jobData.isDeleteSourceMessage()
+		);
 	}
 }

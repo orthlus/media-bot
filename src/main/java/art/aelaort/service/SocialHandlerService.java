@@ -19,6 +19,11 @@ public class SocialHandlerService {
 	private final TikTokHandler tikTokHandler;
 	private final YoutubeHandler youtubeHandler;
 	private final VkHandler vkHandler;
+	private final JobService jobService;
+
+	public void runHandlerByHost(URI uri, Update update, String text, boolean isDeleteSourceMessage) {
+		jobService.runJob(uri, update, text, isDeleteSourceMessage);
+	}
 
 	public void handleByHost(URI uri, Update update, String text, boolean isDeleteSourceMessage) {
 		switch (parseHost(uri)) {

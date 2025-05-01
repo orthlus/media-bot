@@ -28,11 +28,11 @@ import java.util.UUID;
 public class JobService {
 	private final ResourceLoader resourceLoader;
 
-	public void runJob(String type, URI uri, Update update, String text, boolean isDeleteSourceMessage) {
+	public void runJob(URI uri, Update update, String text, boolean isDeleteSourceMessage) {
 		try (KubernetesClient client = new KubernetesClientBuilder().build()) {
 			Job job = parseJob("job.yaml");
 
-			JobData jobData = new JobData(type, uri, update, text, isDeleteSourceMessage);
+			JobData jobData = new JobData(uri, update, text, isDeleteSourceMessage);
 			String jobDataStr = TelegramUtils.serializeJobData(jobData);
 
 			List<EnvVar> env = job.getSpec().getTemplate().getSpec().getContainers().get(0).getEnv();
