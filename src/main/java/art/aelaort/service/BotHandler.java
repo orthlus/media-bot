@@ -32,7 +32,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 @ConditionalOnProperty(name = "run.mode", havingValue = "bot")
 public class BotHandler implements SpringLongPollingBot {
 	private final BotUtils bot;
-	private final SocialHandlerService socialHandlerService;
+	private final JobService jobService;
 	@Getter
 	@Value("${bot.token}")
 	private String botToken;
@@ -120,7 +120,7 @@ public class BotHandler implements SpringLongPollingBot {
 			URI uri = getURL(parseUrlWithSign(inputText));
 			logMessageWithUrl(update);
 			String text = buildTextMessage(uri, update);
-			socialHandlerService.runHandlerByHost(uri, update, text, true);
+			jobService.runJob(uri, update, text, true);
 			bot.deleteMessage(update);
 		} catch (InvalidUrlException | UnknownHostException ignored) {
 		} catch (NotSendException e) {
@@ -137,7 +137,7 @@ public class BotHandler implements SpringLongPollingBot {
 		try {
 			URI uri = getURL(inputText);
 			logMessageWithUrl(update);
-			socialHandlerService.runHandlerByHost(uri, update, "", false);
+			jobService.runJob(uri, update, "", false);
 		} catch (InvalidUrlException e) {
 			sendByUpdate("Какая-то неправильная у вас ссылка :(", update);
 		} catch (UnknownHostException e) {
