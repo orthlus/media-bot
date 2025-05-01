@@ -7,6 +7,7 @@ import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -30,22 +32,27 @@ public class JobService {
 
 	public void runJob(URI uri, Update update, String text, boolean isDeleteSourceMessage) {
 		try (KubernetesClient client = new KubernetesClientBuilder().build()) {
-			Job job = parseJob("job.yaml");
+			Job newJob = parseJob("job.yaml");
 
 			JobData jobData = new JobData(uri, update, text, isDeleteSourceMessage);
 			String jobDataStr = TelegramUtils.serializeJobData(jobData);
 
-			List<EnvVar> env = job.getSpec().getTemplate().getSpec().getContainers().get(0).getEnv();
+			List<EnvVar> env = newJob.getSpec().getTemplate().getSpec().getContainers().get(0).getEnv();
 			env.add(envVar("run_mode", "job"));
 			env.add(envVar("job_data", jobDataStr));
-			job.getMetadata().setName(job.getMetadata().getName() + UUID.randomUUID());
+			newJob.getMetadata().setName(newJob.getMetadata().getName() + UUID.randomUUID());
 
 			client.batch().v1().jobs()
-//					.inNamespace("default")
-					.resource(job).create();
+					.resource(newJob)
+					.waitUntilCondition(this::isJobFinished, 30, TimeUnit.MINUTES);
+		} catch (KubernetesClientException e) {
+			log.error("Job creation or execution failed", e);
 		}
 	}
 
+	private boolean isJobFinished(Job job) {
+		return job.getStatus() != null && (job.getStatus().getSucceeded() != null || job.getStatus().getFailed() != null);
+	}
 
 	private EnvVar envVar(String name, String value) {
 		return new EnvVarBuilder()
