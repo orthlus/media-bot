@@ -38,7 +38,7 @@ public class JobService {
 			List<EnvVar> env = job.getSpec().getTemplate().getSpec().getContainers().get(0).getEnv();
 			env.add(envVar("run_mode", "job"));
 			env.add(envVar("job_data", jobDataStr));
-			job.getSpec().getTemplate().getMetadata().setName(UUID.randomUUID().toString());
+			job.getMetadata().setName(UUID.randomUUID().toString());
 
 			client.batch().v1().jobs()
 //					.inNamespace("default")
