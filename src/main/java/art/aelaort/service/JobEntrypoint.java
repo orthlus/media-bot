@@ -5,7 +5,9 @@ import art.aelaort.utils.TelegramUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(name = "run.mode", havingValue = "job")
 public class JobEntrypoint implements CommandLineRunner {
 	private final SocialHandlerService socialHandlerService;
+	private final ApplicationContext applicationContext;
 	@Value("${job_data}")
 	private String jobDataString;
 
@@ -25,5 +28,6 @@ public class JobEntrypoint implements CommandLineRunner {
 				jobData.text(),
 				jobData.isDeleteSourceMessage()
 		);
+		System.exit(SpringApplication.exit(applicationContext, () -> 0));
 	}
 }
