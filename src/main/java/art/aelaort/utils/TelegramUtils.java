@@ -4,7 +4,6 @@ import art.aelaort.dto.processing.JobData;
 import art.aelaort.exceptions.TooLargeFileException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,16 +20,6 @@ public class TelegramUtils {
 	@SneakyThrows
 	public static String serializeJobData(JobData jobData) {
 		return objectMapper.writeValueAsString(jobData);
-	}
-
-	@SneakyThrows
-	public static Update deserializeUpdate(String updateString) {
-		return objectMapper.readValue(updateString, Update.class);
-	}
-
-	@SneakyThrows
-	public static String serializeUpdate(Update update) {
-		return objectMapper.writeValueAsString(update);
 	}
 
 	public static void checkFileSize(Path file) throws IOException {
