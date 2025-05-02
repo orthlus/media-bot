@@ -47,6 +47,8 @@ public class JobService {
 			Job createdJob = client.batch().v1().jobs().resource(newJob).create();
 
 			waitForJobCompletion(client, createdJob, 30, TimeUnit.MINUTES);
+		} catch (KubernetesJobFailedException e) {
+			log.error("Job failed, uri {}", uri);
 		} catch (KubernetesClientException e) {
 			log.error("Job creation or execution failed", e);
 		}
