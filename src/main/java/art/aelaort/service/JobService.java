@@ -1,6 +1,8 @@
 package art.aelaort.service;
 
 import art.aelaort.dto.processing.JobData;
+import art.aelaort.exceptions.KubernetesJobFailedException;
+import art.aelaort.exceptions.KubernetesJobWaitingTimeoutException;
 import art.aelaort.utils.TelegramUtils;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
@@ -44,21 +46,51 @@ public class JobService {
 
 			Job createdJob = client.batch().v1().jobs().resource(newJob).create();
 
-			client.batch().v1().jobs().withName(createdJob.getMetadata().getName())
-					.waitUntilCondition(this::isJobFinished, 30, TimeUnit.MINUTES);
+			waitForJobCompletion(createdJob, 30, TimeUnit.MINUTES);
 		} catch (KubernetesClientException e) {
 			log.error("Job creation or execution failed", e);
 		}
 	}
 
-	private String randomString() {
-		return UUID.randomUUID().toString().substring(0, 4) + Integer.toHexString((int) System.nanoTime());
+	private void waitForJobCompletion(Job job, long timeout, TimeUnit unit) {
+		long startTime = System.currentTimeMillis();
+		long maxWaitMillis = unit.toMillis(timeout);
+
+		while (System.currentTimeMillis() - startTime < maxWaitMillis) {
+			if (isJobCompleted(job)) {
+				if (isJobSuccessful(job)) {
+					return;
+				} else {
+					throw new KubernetesJobFailedException();
+				}
+			}
+
+			try {
+				TimeUnit.SECONDS.sleep(2);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		throw new KubernetesJobWaitingTimeoutException();
 	}
 
-	private boolean isJobFinished(Job job) {
+	private boolean isJobCompleted(Job job) {
 		return job != null
 			   && job.getStatus() != null
-			   && (job.getStatus().getSucceeded() != null || job.getStatus().getFailed() != null);
+			   && (job.getStatus().getSucceeded() != null
+				   || job.getStatus().getFailed() != null);
+	}
+
+	private boolean isJobSuccessful(Job job) {
+		return job != null
+			   && job.getStatus() != null
+			   && job.getStatus().getSucceeded() != null
+			   && job.getStatus().getSucceeded() >= 1;
+	}
+
+	private String randomString() {
+		return UUID.randomUUID().toString().substring(0, 4) + Integer.toHexString((int) System.nanoTime());
 	}
 
 	private EnvVar envVar(String name, String value) {
