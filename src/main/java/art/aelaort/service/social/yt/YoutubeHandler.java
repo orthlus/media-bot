@@ -1,9 +1,6 @@
 package art.aelaort.service.social.yt;
 
-import art.aelaort.exceptions.NotSendException;
-import art.aelaort.exceptions.PotentiallyTooLargeFileException;
-import art.aelaort.exceptions.TooLargeFileException;
-import art.aelaort.exceptions.YtdlpFileDownloadException;
+import art.aelaort.exceptions.*;
 import art.aelaort.service.social.YtdlpService;
 import art.aelaort.utils.BotUtils;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +41,7 @@ public class YoutubeHandler {
 			bot.sendMarkdown(message, "[Файл](%s) видимо слишком большой, невозможно скачать".formatted(uri));
 		} catch (TooLargeFileException e) {
 			bot.sendMarkdown(message, "[Файл](%s) больше 2 ГБ, невозможно отправить".formatted(uri));
+		} catch (AlreadyLoggedException ignored) {
 		} catch (Exception e) {
 			log.error("error send youtube url - {}", uri, e);
 			throw new NotSendException();
@@ -57,7 +55,10 @@ public class YoutubeHandler {
 		} catch (HttpServerErrorException e) {
 			log.error("http error request ytdlp", e);
 			bot.sendMarkdown(message, "видимо [видео](%s) недоступно, может оно 18+?".formatted(uri));
-			return;
+			if (isDeleteSourceMessage) {
+				bot.deleteMessage(message);
+			}
+			throw new AlreadyLoggedException();
 		}
 
 		if (videoDurationSeconds > 30 * 60) {

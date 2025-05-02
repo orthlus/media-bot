@@ -41,6 +41,7 @@ public class VkHandler {
 			bot.sendMarkdown(message, "[Файл](%s) видимо слишком большой, невозможно скачать".formatted(uri));
 		} catch (TooLargeFileException e) {
 			bot.sendMarkdown(message, "[Файл](%s) больше 2 ГБ, невозможно отправить".formatted(uri));
+		} catch (AlreadyLoggedException ignored) {
 		} catch (Exception e) {
 			log.error("error send vk url - {}", uri, e);
 			throw new NotSendException();
@@ -61,7 +62,10 @@ public class VkHandler {
 		} catch (HttpServerErrorException e) {
 			log.error("http error request ytdlp", e);
 			bot.sendMarkdown(message, "видимо [видео](%s) недоступно, может оно 18+?".formatted(uri));
-			return;
+			if (isDeleteSourceMessage) {
+				bot.deleteMessage(message);
+			}
+			throw new AlreadyLoggedException();
 		}
 
 		if (videoDurationSeconds > 30 * 60) {
