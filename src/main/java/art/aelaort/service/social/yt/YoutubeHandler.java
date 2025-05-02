@@ -51,7 +51,15 @@ public class YoutubeHandler {
 	}
 
 	private void checkVideoDuration(URI uri, Message message, boolean isDeleteSourceMessage) {
-		int videoDurationSeconds = ytdlp.getVideoDurationSeconds(uri, proxyUrl);
+		int videoDurationSeconds;
+		try {
+			videoDurationSeconds = ytdlp.getVideoDurationSeconds(uri, proxyUrl);
+		} catch (HttpServerErrorException e) {
+			log.error("http error request ytdlp", e);
+			bot.sendMarkdown(message, "видимо [видео](%s) недоступно, может оно 18+?".formatted(uri));
+			return;
+		}
+
 		if (videoDurationSeconds > 30 * 60) {
 			String durationText = DurationFormatUtils.formatDurationWords(videoDurationSeconds * 1000L, true, true);
 			bot.sendMarkdown(message, "no no, [video](%s) duration is %s, too long".formatted(uri, durationText));
