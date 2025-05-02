@@ -38,7 +38,7 @@ public class VkHandler {
 			log.error("vk download error - YoutubeFileDownloadException");
 			bot.sendMarkdown(message, "Почему то не удалось скачать [файл](%s)".formatted(uri));
 		} catch (HttpServerErrorException e) {
-			log.error("vk download error - HttpServerErrorException (5xx)");
+			log.error("vk download error - HttpServerErrorException (5xx)", e);
 			bot.sendMarkdown(message, "Почему то (5xx) не удалось скачать [файл](%s)".formatted(uri));
 		} catch (TooLargeFileException e) {
 			bot.sendMarkdown(message, "[Файл](%s) больше 2 ГБ, невозможно отправить".formatted(uri));
