@@ -1,6 +1,7 @@
 package art.aelaort.service.social.yt;
 
 import art.aelaort.exceptions.NotSendException;
+import art.aelaort.exceptions.PotentiallyTooLargeFileException;
 import art.aelaort.exceptions.TooLargeFileException;
 import art.aelaort.exceptions.YtdlpFileDownloadException;
 import art.aelaort.service.social.YtdlpService;
@@ -39,6 +40,8 @@ public class YoutubeHandler {
 		} catch (HttpServerErrorException e) {
 			log.error("youtube download error - HttpServerErrorException (5xx)", e);
 			bot.sendMarkdown(message, "Почему то (5xx) не удалось скачать [файл](%s)".formatted(uri));
+		} catch (PotentiallyTooLargeFileException e) {
+			bot.sendMarkdown(message, "[Файл](%s) видимо слишком большой, невозможно скачать".formatted(uri));
 		} catch (TooLargeFileException e) {
 			bot.sendMarkdown(message, "[Файл](%s) больше 2 ГБ, невозможно отправить".formatted(uri));
 		} catch (Exception e) {
@@ -55,8 +58,9 @@ public class YoutubeHandler {
 			if (isDeleteSourceMessage) {
 				bot.deleteMessage(message);
 			}
-			return;
+			throw new PotentiallyTooLargeFileException();
 		}
+
 		if (!uri.getPath().startsWith("/shorts")) {
 			if (videoDurationSeconds > 120) {
 				String durationText = DurationFormatUtils.formatDurationWords(videoDurationSeconds * 1000L, true, true);

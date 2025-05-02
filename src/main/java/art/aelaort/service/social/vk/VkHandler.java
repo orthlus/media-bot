@@ -1,9 +1,6 @@
 package art.aelaort.service.social.vk;
 
-import art.aelaort.exceptions.NotSendException;
-import art.aelaort.exceptions.NotSupportedVkMediaException;
-import art.aelaort.exceptions.TooLargeFileException;
-import art.aelaort.exceptions.YtdlpFileDownloadException;
+import art.aelaort.exceptions.*;
 import art.aelaort.service.social.YtdlpService;
 import art.aelaort.utils.BotUtils;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +37,8 @@ public class VkHandler {
 		} catch (HttpServerErrorException e) {
 			log.error("vk download error - HttpServerErrorException (5xx)", e);
 			bot.sendMarkdown(message, "Почему то (5xx) не удалось скачать [файл](%s)".formatted(uri));
+		} catch (PotentiallyTooLargeFileException e) {
+			bot.sendMarkdown(message, "[Файл](%s) видимо слишком большой, невозможно скачать".formatted(uri));
 		} catch (TooLargeFileException e) {
 			bot.sendMarkdown(message, "[Файл](%s) больше 2 ГБ, невозможно отправить".formatted(uri));
 		} catch (Exception e) {
@@ -63,7 +62,10 @@ public class VkHandler {
 			if (isDeleteSourceMessage) {
 				bot.deleteMessage(message);
 			}
-		} else if (videoDurationSeconds > 120) {
+			throw new PotentiallyTooLargeFileException();
+		}
+
+		if (videoDurationSeconds > 120) {
 			String durationText = DurationFormatUtils.formatDurationWords(videoDurationSeconds * 1000L, true, true);
 			bot.sendMarkdown(message, "wow, [video](%s) duration is %s. loading...".formatted(uri, durationText));
 			if (isDeleteSourceMessage) {
