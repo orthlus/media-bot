@@ -46,19 +46,24 @@ public class JobService {
 
 			Job createdJob = client.batch().v1().jobs().resource(newJob).create();
 
-			waitForJobCompletion(createdJob, 30, TimeUnit.MINUTES);
+			waitForJobCompletion(client, createdJob, 30, TimeUnit.MINUTES);
 		} catch (KubernetesClientException e) {
 			log.error("Job creation or execution failed", e);
 		}
 	}
 
-	private void waitForJobCompletion(Job job, long timeout, TimeUnit unit) {
+	private void waitForJobCompletion(KubernetesClient client, Job job, long timeout, TimeUnit unit) {
 		long startTime = System.currentTimeMillis();
 		long maxWaitMillis = unit.toMillis(timeout);
 
 		while (System.currentTimeMillis() - startTime < maxWaitMillis) {
-			if (isJobCompleted(job)) {
-				if (isJobSuccessful(job)) {
+			Job runningJob = client.batch().v1().jobs()
+					.inNamespace(job.getMetadata().getNamespace())
+					.withName(job.getMetadata().getName())
+					.get();
+
+			if (isJobCompleted(runningJob)) {
+				if (isJobSuccessful(runningJob)) {
 					return;
 				} else {
 					throw new KubernetesJobFailedException();
