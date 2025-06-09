@@ -3,6 +3,7 @@ package art.aelaort.service.social.ig;
 import art.aelaort.dto.instagram.MediaUrl;
 import art.aelaort.dto.instagram.PhotoUrl;
 import art.aelaort.dto.instagram.VideoUrl;
+import art.aelaort.exceptions.DownloadMediaUnknownException;
 import art.aelaort.exceptions.NotSendException;
 import art.aelaort.utils.BotUtils;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +27,14 @@ import java.util.UUID;
 public class InstagramHandler {
 	private final InstagramService instagram;
 	private final TelegramClient telegramClient;
+	private final BotUtils botUtils;
 
 	public void handle(URI uri, Message message, String text) {
 		try {
 			sendBytes(uri, message, text);
+		} catch (DownloadMediaUnknownException e) {
+			log.error("error downloading media", e);
+			botUtils.sendMarkdown(message, "Не удалось обработать [ссылку](%s) :(".formatted(uri));
 		} catch (Exception e) {
 			log.error("error send instagram file, trying send url - {}", uri, e);
 			try {
@@ -43,6 +48,9 @@ public class InstagramHandler {
 
 	private void sendLinks(URI uri, Message message, String text) {
 		List<MediaUrl> urls = instagram.getMediaUrls(uri);
+		if (urls.isEmpty()) {
+			throw new DownloadMediaUnknownException();
+		}
 		if (urls.size() == 1) {
 			sendMediaByMessage(message, text, urls.get(0), new InputFile(urls.get(0).getUrl()));
 		} else {
@@ -53,6 +61,9 @@ public class InstagramHandler {
 
 	private void sendBytes(URI uri, Message message, String text) {
 		List<MediaUrl> urls = instagram.getMediaUrls(uri);
+		if (urls.isEmpty()) {
+			throw new DownloadMediaUnknownException();
+		}
 		if (urls.size() == 1) {
 			InputStream inputStream = instagram.download(urls.get(0));
 			sendMediaByMessage(message, text, urls.get(0), getISByUrl(inputStream));

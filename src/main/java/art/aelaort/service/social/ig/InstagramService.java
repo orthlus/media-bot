@@ -1,13 +1,13 @@
 package art.aelaort.service.social.ig;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import art.aelaort.exceptions.RequestIgUrlException;
 import art.aelaort.dto.instagram.MediaUrl;
 import art.aelaort.dto.instagram.PhotoUrl;
 import art.aelaort.dto.instagram.VideoUrl;
 import art.aelaort.dto.instagram.api.IGMedia;
-import org.springframework.beans.factory.annotation.Qualifier;
+import art.aelaort.exceptions.RequestIgUrlException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
@@ -17,6 +17,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
@@ -25,12 +26,12 @@ import static java.util.Objects.requireNonNull;
 @Component
 @RequiredArgsConstructor
 public class InstagramService {
-	@Qualifier("ig")
-	private final RestTemplate client;
+	private final RestTemplate ig;
+	private final RestTemplate igNoRedirect;
 
 	@Retryable
 	public InputStream download(MediaUrl url) {
-		byte[] bytes = client.getForObject(URI.create(url.getUrl()), byte[].class);
+		byte[] bytes = ig.getForObject(URI.create(url.getUrl()), byte[].class);
 		return new ByteArrayInputStream(bytes);
 	}
 
@@ -45,6 +46,13 @@ public class InstagramService {
 			} else {
 				return requestMediaUrl("/v1/story/by/url?url=" + uri);
 			}
+		} else if (uri.toString().contains("/share/")){
+			Optional<String> redirectUri = tryGetRedirect(uri);
+			if (redirectUri.isPresent()) {
+				return requestMediaUrl("/v1/media/by/url?url=" + redirectUri);
+			} else {
+				return List.of();
+			}
 		} else {
 			return requestMediaUrl("/v1/media/by/url?url=" + uri);
 		}
@@ -53,11 +61,19 @@ public class InstagramService {
 	@Retryable
 	private List<MediaUrl> requestMediaUrl(String path) {
 		try {
-			IGMedia igMedia = client.getForObject(path, IGMedia.class);
+			IGMedia igMedia = ig.getForObject(path, IGMedia.class);
 			return parseListMediaUrl(requireNonNull(igMedia));
 		} catch (IllegalStateException | RestClientException e) {
 			throw new RequestIgUrlException("ig error: " + path, e);
 		}
+	}
+
+	private Optional<String> tryGetRedirect(URI uri) {
+		ResponseEntity<String> response = igNoRedirect.getForEntity(uri, String.class);
+		if (response.getStatusCode().is3xxRedirection()) {
+			return Optional.of(response.getHeaders().getFirst("Location"));
+		}
+		return Optional.empty();
 	}
 
 	private List<MediaUrl> parseListMediaUrl(IGMedia media) {

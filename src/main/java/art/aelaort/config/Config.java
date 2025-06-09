@@ -1,9 +1,11 @@
 package art.aelaort.config;
 
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.web.client.RestTemplate;
@@ -28,6 +30,22 @@ public class Config {
 
 		requestFactory.setProxy(proxy);
 		restTemplate.setRequestFactory(requestFactory);
+	}
+
+	@Bean
+	public RestTemplate igNoRedirect(RestTemplateBuilder restTemplateBuilder,
+									 @Value("${instagram.api.token}") String igApiToken,
+									 @Value("${instagram.api.url}") String igApiUrl) {
+		return restTemplateBuilder
+				.requestFactory(() ->  new HttpComponentsClientHttpRequestFactory(HttpClients.custom()
+						.disableRedirectHandling()
+						.build()))
+				.customizers(this::proxyCustomizer)
+				.rootUri(igApiUrl)
+				.connectTimeout(Duration.ofSeconds(20))
+				.readTimeout(Duration.ofSeconds(20))
+				.defaultHeader("x-access-key", igApiToken)
+				.build();
 	}
 
 	@Bean
