@@ -7,6 +7,7 @@ import art.aelaort.dto.instagram.api.IGMedia;
 import art.aelaort.exceptions.RequestIgUrlException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -71,7 +72,7 @@ public class InstagramService {
 
 	private Optional<URI> tryGetRedirect(URI uri) {
 		log.debug("Trying to redirect to {}", uri);
-		ResponseEntity<String> response = igNoRedirect.getForEntity(uri, String.class);
+		ResponseEntity<Void> response = igNoRedirect.exchange(uri, HttpMethod.GET, null, Void.class);
 		log.debug("Redirected to {} - headers: {}", response.getStatusCode(), response.getHeaders());
 		if (response.getStatusCode().is3xxRedirection()) {
 			URI location = response.getHeaders().getLocation();

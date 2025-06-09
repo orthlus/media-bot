@@ -35,9 +35,10 @@ public class Config {
 	@Bean
 	public RestTemplate igNoRedirect(RestTemplateBuilder restTemplateBuilder) {
 		return restTemplateBuilder
-				.requestFactory(() ->  new HttpComponentsClientHttpRequestFactory(HttpClients.custom()
-						.disableRedirectHandling()
-						.build()))
+				.requestFactory(() -> new HttpComponentsClientHttpRequestFactory(
+						HttpClients.custom()
+								.disableRedirectHandling()
+								.build()))
 				.customizers(this::proxyCustomizer)
 				.connectTimeout(Duration.ofSeconds(20))
 				.readTimeout(Duration.ofSeconds(20))
