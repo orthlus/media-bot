@@ -36,6 +36,7 @@ public class InstagramService {
 	}
 
 	public List<MediaUrl> getMediaUrls(URI uri) {
+		log.debug("getMediaUrls({})", uri);
 		if (uri.toString().contains("/stories/")) {
 			if (uri.toString().contains("/s/")) {
 				try {
@@ -69,9 +70,13 @@ public class InstagramService {
 	}
 
 	private Optional<String> tryGetRedirect(URI uri) {
+		log.debug("Trying to redirect to {}", uri);
 		ResponseEntity<String> response = igNoRedirect.getForEntity(uri, String.class);
+		log.debug("Redirected to {} - body: {}, headers: {}", response.getStatusCode(), response.getBody(), response.getHeaders());
 		if (response.getStatusCode().is3xxRedirection()) {
-			return Optional.of(response.getHeaders().getFirst("Location"));
+			String location = response.getHeaders().getFirst("Location");
+			log.debug("Redirected to {}", location);
+			return Optional.ofNullable(location);
 		}
 		return Optional.empty();
 	}
