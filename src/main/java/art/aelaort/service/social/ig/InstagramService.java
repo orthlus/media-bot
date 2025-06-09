@@ -48,7 +48,7 @@ public class InstagramService {
 				return requestMediaUrl("/v1/story/by/url?url=" + uri);
 			}
 		} else if (uri.toString().contains("/share/")){
-			Optional<String> redirectUri = tryGetRedirect(uri);
+			Optional<URI> redirectUri = tryGetRedirect(uri);
 			if (redirectUri.isPresent()) {
 				return requestMediaUrl("/v1/media/by/url?url=" + redirectUri);
 			} else {
@@ -69,12 +69,12 @@ public class InstagramService {
 		}
 	}
 
-	private Optional<String> tryGetRedirect(URI uri) {
+	private Optional<URI> tryGetRedirect(URI uri) {
 		log.debug("Trying to redirect to {}", uri);
 		ResponseEntity<String> response = igNoRedirect.getForEntity(uri, String.class);
 		log.debug("Redirected to {} - headers: {}", response.getStatusCode(), response.getHeaders());
 		if (response.getStatusCode().is3xxRedirection()) {
-			String location = response.getHeaders().getFirst("Location");
+			URI location = response.getHeaders().getLocation();
 			log.debug("Redirected to {}", location);
 			return Optional.ofNullable(location);
 		}
