@@ -32,13 +32,13 @@ public class InstagramHandler {
 	public void handle(URI uri, Message message, String text) {
 		try {
 			sendBytes(uri, message, text);
-		} catch (DownloadMediaUnknownException e) {
-			log.error("error downloading media", e);
-			botUtils.sendMarkdown(message, "Не удалось обработать [ссылку](%s) :(".formatted(uri));
 		} catch (Exception e) {
 			log.error("error send instagram file, trying send url - {}", uri, e);
 			try {
 				sendLinks(uri, message, text);
+			} catch (DownloadMediaUnknownException ex) {
+				log.error("error downloading media", e);
+				botUtils.sendMarkdown(message, "Не удалось обработать [ссылку](%s) :(".formatted(uri));
 			} catch (RuntimeException ex) {
 				log.error("error send instagram - {}", uri, e);
 				throw new NotSendException();
