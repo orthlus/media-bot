@@ -33,18 +33,14 @@ public class Config {
 	}
 
 	@Bean
-	public RestTemplate igNoRedirect(RestTemplateBuilder restTemplateBuilder,
-									 @Value("${instagram.api.token}") String igApiToken,
-									 @Value("${instagram.api.url}") String igApiUrl) {
+	public RestTemplate igNoRedirect(RestTemplateBuilder restTemplateBuilder) {
 		return restTemplateBuilder
 				.requestFactory(() ->  new HttpComponentsClientHttpRequestFactory(HttpClients.custom()
 						.disableRedirectHandling()
 						.build()))
 				.customizers(this::proxyCustomizer)
-				.rootUri(igApiUrl)
 				.connectTimeout(Duration.ofSeconds(20))
 				.readTimeout(Duration.ofSeconds(20))
-				.defaultHeader("x-access-key", igApiToken)
 				.build();
 	}
 
