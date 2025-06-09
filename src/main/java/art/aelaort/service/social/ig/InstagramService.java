@@ -72,7 +72,7 @@ public class InstagramService {
 	private Optional<String> tryGetRedirect(URI uri) {
 		log.debug("Trying to redirect to {}", uri);
 		ResponseEntity<String> response = igNoRedirect.getForEntity(uri, String.class);
-		log.debug("Redirected to {} - body: {}, headers: {}", response.getStatusCode(), response.getBody(), response.getHeaders());
+		log.debug("Redirected to {} - headers: {}", response.getStatusCode(), response.getHeaders());
 		if (response.getStatusCode().is3xxRedirection()) {
 			String location = response.getHeaders().getFirst("Location");
 			log.debug("Redirected to {}", location);
