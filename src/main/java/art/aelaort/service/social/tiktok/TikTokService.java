@@ -41,8 +41,8 @@ public class TikTokService {
 	}
 
 	@Retryable
-	public InputStream download(String videoUrl) {
-		byte[] bytes = rawProxy.getForObject(URI.create(videoUrl), byte[].class);
+	public InputStream download(String fileUrl) {
+		byte[] bytes = rawProxy.getForObject(URI.create(fileUrl), byte[].class);
 		return new ByteArrayInputStream(bytes);
 	}
 }

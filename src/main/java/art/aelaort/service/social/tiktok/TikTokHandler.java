@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
@@ -32,7 +33,15 @@ public class TikTokHandler {
 
 	private void tiktokSendImages(VideoData data, Message message, String text) {
 		List<String> imagesUrls = tiktok.getImagesUrls(data);
-		BotUtils.sendImagesByMessage(message, imagesUrls, text, telegramClient);
+		try {
+			List<InputMediaPhoto> urls = imagesUrls.stream().map(InputMediaPhoto::new).toList();
+			BotUtils.sendMediasByMessage(message, urls, text, telegramClient);
+		} catch (Exception e) {
+			List<InputMediaPhoto> urls = imagesUrls.stream()
+					.map(url -> new InputMediaPhoto(tiktok.download(url), UUID.randomUUID().toString()))
+					.toList();
+			BotUtils.sendMediasByMessage(message, urls, text, telegramClient);
+		}
 	}
 
 	private void tiktokSendVideo(VideoData data, URI uri, Message message, String text) {

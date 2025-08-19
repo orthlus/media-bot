@@ -89,7 +89,7 @@ public class BotUtils {
 				telegramClient);
 	}
 
-	public static void sendMediasByMessage(Message message, List<InputMedia> inputMedias, String text, TelegramClient telegramClient) {
+	public static void sendMediasByMessage(Message message, List<? extends InputMedia> inputMedias, String text, TelegramClient telegramClient) {
 		if (inputMedias.isEmpty()) {
 			return;
 		}
@@ -107,8 +107,8 @@ public class BotUtils {
 				sendMedias(message, inputMedias, text, telegramClient);
 			}
 		} else {
-			List<List<InputMedia>> partitions = Lists.partition(inputMedias, 10);
-			for (List<InputMedia> medias : partitions) {
+			List<? extends List<? extends InputMedia>> partitions = Lists.partition(inputMedias, 10);
+			for (List<? extends InputMedia> medias : partitions) {
 				sendMedias(message, medias, text, telegramClient);
 			}
 		}
@@ -123,6 +123,7 @@ public class BotUtils {
 				telegramClient);
 	}
 
+	@Deprecated
 	public static void sendImagesByMessage(Message message, List<String> imagesUrls, String text, TelegramClient telegramClient) {
 		if (imagesUrls.isEmpty()) {
 			return;
