@@ -11,17 +11,17 @@ public class VideoData {
 	private Data data;
 
 	public List<String> getVideoUrls() {
-		return data.awemeDetails[0].video.bitRate[0].playAddr.urlList;
+		return data.awemeDetails.get(0).video.bitRate[0].playAddr.urlList;
 	}
 
 	public List<String> getImagesUrls() {
-		List<Image> images = data.awemeDetails[0].imagePostInfo.images;
+		List<Image> images = data.awemeDetails.get(0).imagePostInfo.images;
 		return images.stream()
 				.map(image -> image.displayImage.urlList.get(1))
 				.toList();
 	}
 
 	public boolean hasImages() {
-		return data.awemeDetails[0].imagePostInfo != null;
+		return data.awemeDetails.get(0).imagePostInfo != null;
 	}
 }
