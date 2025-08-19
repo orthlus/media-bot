@@ -114,7 +114,7 @@ public class BotUtils {
 		}
 	}
 
-	private static void sendMedias(Message message, List<InputMedia> photos, String text, TelegramClient telegramClient) {
+	private static void sendMedias(Message message, List<? extends InputMedia> photos, String text, TelegramClient telegramClient) {
 		photos.get(0).setCaption(text);
 		photos.get(0).setParseMode("markdown");
 		execute(SendMediaGroup.builder()
@@ -142,7 +142,7 @@ public class BotUtils {
 
 			if (message.isGroupMessage() || message.isSuperGroupMessage()) {
 				if (inputMediaPhotos.size() > 10) {
-					sendPhotos(message, inputMediaPhotos.subList(0, 10), text, telegramClient);
+					sendMedias(message, inputMediaPhotos.subList(0, 10), text, telegramClient);
 					sleep(500);
 					String s = "Больше 10 фото в группу не имею присылать((\nА прислано было %d фото".formatted(imagesUrls.size());
 					execute(SendMessage.builder()
@@ -150,12 +150,12 @@ public class BotUtils {
 							.chatId(message.getChatId()),
 							telegramClient);
 				} else {
-					sendPhotos(message, inputMediaPhotos, text, telegramClient);
+					sendMedias(message, inputMediaPhotos, text, telegramClient);
 				}
 			} else {
 				List<List<InputMediaPhoto>> partitions = Lists.partition(inputMediaPhotos, 10);
 				for (List<InputMediaPhoto> photos : partitions) {
-					sendPhotos(message, photos, text, telegramClient);
+					sendMedias(message, photos, text, telegramClient);
 				}
 			}
 		}
