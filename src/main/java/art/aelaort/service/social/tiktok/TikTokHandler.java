@@ -37,6 +37,7 @@ public class TikTokHandler {
 			List<InputMediaPhoto> urls = imagesUrls.stream().map(InputMediaPhoto::new).toList();
 			BotUtils.sendMediasByMessage(message, urls, text, telegramClient);
 		} catch (Exception e) {
+			log.error("error sending tiktok images by url, try downloading... Error: {}", e.getMessage());
 			List<InputMediaPhoto> urls = imagesUrls.stream()
 					.map(url -> new InputMediaPhoto(tiktok.download(url), UUID.randomUUID().toString()))
 					.toList();
