@@ -1,8 +1,8 @@
 package art.aelaort.service.social;
 
+import art.aelaort.exceptions.YtdlpFileDownloadException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import art.aelaort.exceptions.YtdlpFileDownloadException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
