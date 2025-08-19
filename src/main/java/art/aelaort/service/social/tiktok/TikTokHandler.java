@@ -1,6 +1,7 @@
 package art.aelaort.service.social.tiktok;
 
 import art.aelaort.dto.tiktok.VideoData;
+import art.aelaort.exceptions.DownloadMediaUnknownException;
 import art.aelaort.utils.BotUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,27 +22,47 @@ import java.util.UUID;
 public class TikTokHandler {
 	private final TikTokService tiktok;
 	private final TelegramClient telegramClient;
+	private final BotUtils botUtils;
 
 	public void handle(URI uri, Message message, String text) {
-		VideoData data = tiktok.getData(uri);
-		if (tiktok.isVideo(data)) {
-			tiktokSendVideo(data, uri, message, text);
-		} else {
-			tiktokSendImages(data, message, text);
+		try {
+			VideoData data = tiktok.getData(uri);
+			if (tiktok.isVideo(data)) {
+				tiktokSendVideo(data, uri, message, text);
+			} else {
+				tiktokSendImages(data, message, text);
+			}
+		} catch (DownloadMediaUnknownException e) {
+			log.error("error downloading media", e);
+			botUtils.sendMarkdown(message, "Не удалось обработать [ссылку](%s) :(".formatted(uri));
 		}
 	}
 
 	private void tiktokSendImages(VideoData data, Message message, String text) {
 		List<String> imagesUrls = tiktok.getImagesUrls(data);
-		try {
-			List<InputMediaPhoto> urls = imagesUrls.stream().map(InputMediaPhoto::new).toList();
-			BotUtils.sendMediasByMessage(message, urls, text, telegramClient);
-		} catch (Exception e) {
-			log.error("error sending tiktok images by url, try downloading... Error: {}", e.getMessage());
-			List<InputMediaPhoto> urls = imagesUrls.stream()
-					.map(url -> new InputMediaPhoto(tiktok.download(url), UUID.randomUUID().toString()))
-					.toList();
-			BotUtils.sendMediasByMessage(message, urls, text, telegramClient);
+		if (imagesUrls.isEmpty()) {
+			throw new DownloadMediaUnknownException();
+		}
+
+		if (imagesUrls.size() == 1) {
+			String url = imagesUrls.get(0);
+			try {
+				sendImageByMessage(message, text, url);
+			} catch (Exception e) {
+				log.error("error sending tiktok image by url, try downloading... Error: {}", e.getMessage());
+				sendImageByMessage(message, text, tiktok.download(url));
+			}
+		} else {
+			try {
+				List<InputMediaPhoto> urls = imagesUrls.stream().map(InputMediaPhoto::new).toList();
+				BotUtils.sendMediasByMessage(message, urls, text, telegramClient);
+			} catch (Exception e) {
+				log.error("error sending tiktok images by url, try downloading... Error: {}", e.getMessage());
+				List<InputMediaPhoto> urls = imagesUrls.stream()
+						.map(url -> new InputMediaPhoto(tiktok.download(url), UUID.randomUUID().toString()))
+						.toList();
+				BotUtils.sendMediasByMessage(message, urls, text, telegramClient);
+			}
 		}
 	}
 
@@ -79,5 +100,13 @@ public class TikTokHandler {
 
 	public void sendVideoByMessage(Message message, String text, String videoUrl) {
 		BotUtils.sendVideoByMessage(message, text, new InputFile(videoUrl), telegramClient);
+	}
+
+	public void sendImageByMessage(Message message, String text, InputStream dataStream) {
+		BotUtils.sendImageByMessage(message, text, new InputFile(dataStream, UUID.randomUUID().toString()), telegramClient);
+	}
+
+	public void sendImageByMessage(Message message, String text, String imageUrl) {
+		BotUtils.sendImageByMessage(message, text, new InputFile(imageUrl), telegramClient);
 	}
 }
