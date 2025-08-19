@@ -17,7 +17,7 @@ public class VideoData {
 	public List<String> getImagesUrls() {
 		List<Image> images = data.awemeDetails.get(0).imagePostInfo.images;
 		return images.stream()
-				.map(image -> image.displayImage.urlList.get(1))
+				.map(image -> image.displayImage.urlList.get(0))
 				.toList();
 	}
 
