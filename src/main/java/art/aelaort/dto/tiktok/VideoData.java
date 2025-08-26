@@ -11,7 +11,11 @@ public class VideoData {
 	private Data data;
 
 	public List<String> getVideoUrls() {
-		return data.awemeDetails.get(0).video.bitRate[0].playAddr.urlList;
+		try {
+			return data.awemeDetails.get(0).video.playAddr.urlList;
+		} catch (NullPointerException e) {
+			return data.awemeDetails.get(0).video.bitRate[0].playAddr.urlList;
+		}
 	}
 
 	public List<String> getImagesUrls() {
