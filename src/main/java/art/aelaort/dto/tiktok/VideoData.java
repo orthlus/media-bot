@@ -3,7 +3,9 @@ package art.aelaort.dto.tiktok;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VideoData {
@@ -20,9 +22,16 @@ public class VideoData {
 
 	public List<String> getImagesUrls() {
 		List<Image> images = data.awemeDetails.get(0).imagePostInfo.images;
-		return images.stream()
-				.map(image -> image.displayImage.urlList.get(0))
-				.toList();
+		List<String> result = new ArrayList<>(images.size());
+
+		for (Image image : images) {
+			List<String> urlList = image.displayImage.urlList;
+			Optional<String> url = urlList.stream()
+					.filter(u -> !u.contains(".heic"))
+					.findFirst();
+			url.ifPresent(result::add);
+		}
+		return result;
 	}
 
 	public boolean hasImages() {
