@@ -31,6 +31,7 @@ public class JobEntrypoint implements CommandLineRunner {
 				jobData.text(),
 				jobData.isDeleteSourceMessage()
 		);
+		log.info("job finished with uri: {}", jobData.uri());
 		System.exit(SpringApplication.exit(applicationContext, () -> 0));
 	}
 }
