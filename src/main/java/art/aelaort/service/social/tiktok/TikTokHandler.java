@@ -70,29 +70,6 @@ public class TikTokHandler {
 	private void tiktokSendVideo(VideoData data, URI uri, Message message, String text) {
 		List<String> urls = tiktok.getVideoMediaUrls(data);
 
-//		for (String url : urls) {
-//			try {
-//				InputStream file = tiktok.download(url);
-//				sendVideoByMessage(message, text, file);
-//
-//				return;
-//			} catch (Exception e) {
-//				log.error("error tiktok by {} - error send file", url, e);
-//			}
-//		}
-//		log.error("error send tiktok file, trying send url - {}", uri);
-
-		for (String url : urls) {
-			try {
-				sendVideoByMessage(message, text, url);
-
-				return;
-			} catch (Exception e) {
-				log.error("error tiktok by {} - error send url", url, e);
-			}
-		}
-		log.error("error send tiktok url, trying send file - {}", uri);
-
 		for (String url : urls) {
 			try {
 //				InputStream file = tiktok.download(url);
@@ -103,6 +80,17 @@ public class TikTokHandler {
 				return;
 			} catch (Exception e) {
 				log.error("error tiktok by {} - error send file", url, e);
+			}
+		}
+		log.error("error send tiktok file, trying send url - {}", uri);
+
+		for (String url : urls) {
+			try {
+				sendVideoByMessage(message, text, url);
+
+				return;
+			} catch (Exception e) {
+				log.error("error tiktok by {} - error send url", url, e);
 			}
 		}
 
