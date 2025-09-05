@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
@@ -69,17 +70,17 @@ public class TikTokHandler {
 	private void tiktokSendVideo(VideoData data, URI uri, Message message, String text) {
 		List<String> urls = tiktok.getVideoMediaUrls(data);
 
-		for (String url : urls) {
-			try {
-				InputStream file = tiktok.download(url);
-				sendVideoByMessage(message, text, file);
-
-				return;
-			} catch (Exception e) {
-				log.error("error tiktok by {} - error send file", url, e);
-			}
-		}
-		log.error("error send tiktok file, trying send url - {}", uri);
+//		for (String url : urls) {
+//			try {
+//				InputStream file = tiktok.download(url);
+//				sendVideoByMessage(message, text, file);
+//
+//				return;
+//			} catch (Exception e) {
+//				log.error("error tiktok by {} - error send file", url, e);
+//			}
+//		}
+//		log.error("error send tiktok file, trying send url - {}", uri);
 
 		for (String url : urls) {
 			try {
@@ -90,8 +91,26 @@ public class TikTokHandler {
 				log.error("error tiktok by {} - error send url", url, e);
 			}
 		}
+		log.error("error send tiktok url, trying send file - {}", uri);
+
+		for (String url : urls) {
+			try {
+//				InputStream file = tiktok.download(url);
+//				sendVideoByMessage(message, text, file);
+				Path file = tiktok.downloadFile(url);
+				sendVideoByMessage(message, text, file);
+
+				return;
+			} catch (Exception e) {
+				log.error("error tiktok by {} - error send file", url, e);
+			}
+		}
 
 		log.error("error send tiktok - {}", uri);
+	}
+
+	public void sendVideoByMessage(Message message, String text, Path file) {
+		BotUtils.sendVideoByMessage(message, text, new InputFile(file.toFile(), UUID.randomUUID() + ".mp4"), telegramClient);
 	}
 
 	public void sendVideoByMessage(Message message, String text, InputStream dataStream) {

@@ -4,13 +4,19 @@ import art.aelaort.dto.tiktok.VideoData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpMethod;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.List;
 
 @SuppressWarnings("DataFlowIssue")
@@ -39,6 +45,19 @@ public class TikTokService {
 	public List<String> getVideoMediaUrls(VideoData data) {
 		return isVideo(data) ? data.getVideoUrls() : List.of();
 	}
+
+	@Retryable
+	public Path downloadFile(String fileUrl) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseExtractor<Path> responseExtractor = response -> {
+			File file = File.createTempFile("download", "tmp");
+			StreamUtils.copy(response.getBody(), new FileOutputStream(file));
+			return file.toPath();
+		};
+
+        return restTemplate.execute(URI.create(fileUrl), HttpMethod.GET, null, responseExtractor);
+    }
 
 	@Retryable
 	public InputStream download(String fileUrl) {
