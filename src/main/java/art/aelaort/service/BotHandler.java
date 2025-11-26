@@ -1,6 +1,6 @@
 package art.aelaort.service;
 
-import art.aelaort.SpringLongPollingBot;
+import art.aelaort.telegram.SimpleLongPollingBot;
 import art.aelaort.exceptions.InvalidUrlException;
 import art.aelaort.exceptions.NotSendException;
 import art.aelaort.exceptions.UnknownHostException;
@@ -31,7 +31,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 @Component
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "run.mode", havingValue = "bot")
-public class BotHandler implements SpringLongPollingBot {
+public class BotHandler implements SimpleLongPollingBot {
 	private final BotUtils bot;
 	private final JobService jobService;
 	@Getter

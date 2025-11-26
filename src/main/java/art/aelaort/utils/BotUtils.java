@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static art.aelaort.TelegramClientHelpers.execute;
+import static art.aelaort.telegram.client.TelegramClientHelpers.execute;
 
 @Slf4j
 @Component
